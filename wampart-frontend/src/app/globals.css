@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Wampart brand colors (fixed values) */
+@theme {
+  --color-navy: #0A1628;
+  --color-royal: #1E3A8A;
+  --color-azure: #2563EB;
+  --color-gold: #F59E0B;
+  --color-success: #10B981;
+  --color-warning: #F97316;
+  --color-danger: #EF4444;
+  --color-purple: #8B5CF6;
+  --color-off-white: #F8FAFC;
+  --color-light-gray: #E2E8F0;
+}
+
+/* Semantic tokens that map to CSS vars */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0A1628;
+
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0A1628;
+  --sidebar-border: #E2E8F0;
+  --sidebar-accent: #F1F5FF;
+  --sidebar-accent-foreground: #1E3A8A;
+  --card: #ffffff;
+  --card-foreground: #0A1628;
+  --muted: #F8FAFC;
+  --muted-foreground: #64748b;
+  --primary: #1E3A8A;
+  --primary-foreground: #ffffff;
+  --secondary: #F8FAFC;
+  --secondary-foreground: #0A1628;
+  --destructive: #EF4444;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #2563EB;
+  --radius: 0.625rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Page Animations ──────────────────────────────────────────────────────── */
+
+@keyframes kenBurns {
+  0%   { transform: scale(1)    translate(0, 0); }
+  100% { transform: scale(1.1)  translate(-1.5%, 0.8%); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+
+.ken-burns {
+  animation: kenBurns 20s ease-in-out infinite alternate;
+}
+
+.fade-in-down {
+  animation: fadeInDown 0.8s ease-out 0.3s both;
+}
+
+.fade-in-left {
+  animation: fadeInLeft 0.9s ease-out both;
+}
+
+.fade-in-right {
+  animation: fadeInRight 0.9s ease-out 0.25s both;
+}
+
+.cursor-blink {
+  animation: cursorBlink 0.85s ease-in-out infinite;
+}
+
+.scroll-bounce {
+  animation: scrollBounce 1.6s ease-in-out infinite;
+}
+
+@keyframes fadeInWord {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
