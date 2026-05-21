@@ -11,6 +11,8 @@ import {
   ArrowRight,
   Star,
   ChevronDown,
+  Search,
+  ClipboardList,
 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -112,6 +114,7 @@ const HEADLINE = "Hire the Best Car for Your Journey";
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const { displayed, done } = useTypewriter(HEADLINE, 42, 900);
+  const [activeTab, setActiveTab] = useState<"fleet" | "steps">("fleet");
 
   return (
     <div className="min-h-screen flex flex-col bg-navy">
@@ -183,8 +186,7 @@ export default function LandingPage() {
             </Link>
             <Link href="#how-it-works">
               <Button
-                variant="outline"
-                className="border-white/25 text-white hover:bg-white/10 h-12 px-8 text-base backdrop-blur-sm rounded-xl"
+                className="bg-white text-navy hover:bg-white/90 font-bold h-12 px-8 text-base rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
               >
                 How It Works
               </Button>
@@ -240,114 +242,124 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          HOW IT WORKS
+          FLEET + HOW IT WORKS — tabbed
          ══════════════════════════════════════════════════ */}
       <section id="how-it-works" className="bg-off-white py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <AnimateIn className="text-center mb-16">
+
+          <AnimateIn className="text-center mb-10">
             <p className="text-royal text-xs font-bold tracking-[0.25em] uppercase mb-3">
-              Simple Process
+              Explore &amp; Book
             </p>
-            <h2 className="text-4xl font-black text-navy">
-              Your Journey in 3 Steps
-            </h2>
+            <h2 className="text-4xl font-black text-navy">Your Journey Starts Here</h2>
+            <p className="text-muted-foreground mt-2">Browse our fleet or learn how booking works</p>
           </AnimateIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-14 left-[calc(33%+2rem)] right-[calc(33%+2rem)] h-px bg-gradient-to-r from-transparent via-royal/25 to-transparent" />
-            {STEPS.map((s, i) => (
-              <AnimateIn key={s.step} delay={i * 140}>
-                <div className="relative flex flex-col items-center text-center bg-white p-8 rounded-2xl border border-light-gray shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-                  <span className="absolute top-5 right-6 text-5xl font-black text-navy/5 select-none">
-                    {s.step}
-                  </span>
-                  <div className="h-16 w-16 rounded-2xl bg-navy flex items-center justify-center text-2xl mb-5 shadow-lg shadow-navy/20 group-hover:bg-royal transition-colors duration-300">
-                    {s.emoji}
-                  </div>
-                  <h3 className="font-bold text-navy text-lg mb-2">{s.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {s.desc}
-                  </p>
-                </div>
-              </AnimateIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
-          FEATURED CARS
-         ══════════════════════════════════════════════════ */}
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <AnimateIn className="text-center mb-16">
-            <p className="text-royal text-xs font-bold tracking-[0.25em] uppercase mb-3">
-              Our Fleet
-            </p>
-            <h2 className="text-4xl font-black text-navy">
-              Premium Vehicles
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              Choose from our curated selection of well-maintained cars
-            </p>
-          </AnimateIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {FEATURED_CARS.map((car, i) => (
-              <AnimateIn key={car.name} delay={i * 100}>
-                <div className="rounded-2xl border border-light-gray overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2">
-                  {/* Card image area */}
-                  <div className="bg-gradient-to-br from-navy to-royal h-52 flex items-center justify-center relative overflow-hidden">
-                    <Car className="h-32 w-32 text-white/5 absolute group-hover:scale-110 transition-transform duration-700" />
-                    <Car className="h-20 w-20 text-white/25 relative z-10" />
-                    <span className="absolute top-3 left-3 bg-success text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                      Available
-                    </span>
-                    <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs text-white">
-                      <Star className="h-3 w-3 text-gold fill-gold" />
-                      {car.rating}
-                    </div>
-                    {/* Gold shimmer line at bottom of card image */}
-                    <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-                  </div>
-
-                  <div className="p-5">
-                    <h3 className="font-bold text-navy text-lg">{car.name}</h3>
-                    <p className="text-muted-foreground text-xs mb-4">
-                      {car.year} · {car.fuel} · {car.seats} seats
-                    </p>
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <span className="text-royal font-black text-2xl">
-                          KES {car.price.toLocaleString()}
-                        </span>
-                        <span className="text-muted-foreground text-xs"> /day</span>
-                      </div>
-                      <Link href="/cars">
-                        <Button
-                          size="sm"
-                          className="bg-navy text-white hover:bg-royal gap-1 rounded-lg transition-colors duration-200"
-                        >
-                          Book Now <ArrowRight className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </AnimateIn>
-            ))}
-          </div>
-
-          <AnimateIn className="text-center mt-10">
-            <Link href="/cars">
-              <Button
-                variant="outline"
-                className="border-navy text-navy hover:bg-navy hover:text-white gap-2 h-11 px-8 rounded-xl transition-all duration-200"
+          {/* Tab pills */}
+          <AnimateIn className="flex justify-center mb-12">
+            <div className="inline-flex rounded-2xl bg-white border border-light-gray p-1.5 shadow-sm gap-1">
+              <button
+                onClick={() => setActiveTab("fleet")}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  activeTab === "fleet"
+                    ? "bg-navy text-white shadow-md scale-[1.02]"
+                    : "text-navy/50 hover:text-navy hover:bg-navy/5"
+                }`}
               >
-                View All Cars <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+                <Search className="h-4 w-4" /> Our Fleet
+              </button>
+              <button
+                onClick={() => setActiveTab("steps")}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  activeTab === "steps"
+                    ? "bg-navy text-white shadow-md scale-[1.02]"
+                    : "text-navy/50 hover:text-navy hover:bg-navy/5"
+                }`}
+              >
+                <ClipboardList className="h-4 w-4" /> How to Book
+              </button>
+            </div>
           </AnimateIn>
+
+          {/* Fleet tab */}
+          {activeTab === "fleet" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {FEATURED_CARS.map((car, i) => (
+                  <AnimateIn key={car.name} delay={i * 100}>
+                    <div className="rounded-2xl border border-light-gray overflow-hidden bg-white hover:shadow-2xl transition-all duration-500 group hover:-translate-y-2 hover:scale-[1.02]">
+                      <div className="bg-gradient-to-br from-navy to-royal h-52 flex items-center justify-center relative overflow-hidden">
+                        <Car className="h-32 w-32 text-white/5 absolute group-hover:scale-110 transition-transform duration-700" />
+                        <Car className="h-20 w-20 text-white/25 relative z-10" />
+                        <span className="absolute top-3 left-3 bg-success text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                          Available
+                        </span>
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs text-white">
+                          <Star className="h-3 w-3 text-gold fill-gold" />
+                          {car.rating}
+                        </div>
+                        <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-bold text-navy text-lg">{car.name}</h3>
+                        <p className="text-muted-foreground text-xs mb-4">
+                          {car.year} · {car.fuel} · {car.seats} seats
+                        </p>
+                        <div className="flex items-end justify-between">
+                          <div>
+                            <span className="text-royal font-black text-2xl">
+                              KES {car.price.toLocaleString()}
+                            </span>
+                            <span className="text-muted-foreground text-xs"> /day</span>
+                          </div>
+                          <Link href="/cars">
+                            <Button
+                              size="sm"
+                              className="bg-navy text-white hover:bg-royal gap-1 rounded-lg transition-all duration-200 hover:scale-105"
+                            >
+                              Book Now <ArrowRight className="h-3 w-3" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimateIn>
+                ))}
+              </div>
+              <AnimateIn className="text-center mt-10">
+                <Link href="/cars">
+                  <Button
+                    variant="outline"
+                    className="border-navy text-navy hover:bg-navy hover:text-white gap-2 h-11 px-8 rounded-xl transition-all duration-300 hover:scale-105"
+                  >
+                    View Full Fleet <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </AnimateIn>
+            </>
+          )}
+
+          {/* How to Book tab */}
+          {activeTab === "steps" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              <div className="hidden md:block absolute top-14 left-[calc(33%+2rem)] right-[calc(33%+2rem)] h-px bg-gradient-to-r from-transparent via-royal/25 to-transparent" />
+              {STEPS.map((s, i) => (
+                <AnimateIn key={s.step} delay={i * 140}>
+                  <div className="relative flex flex-col items-center text-center bg-white p-8 rounded-2xl border border-light-gray shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] group">
+                    <span className="absolute top-5 right-6 text-5xl font-black text-navy/5 select-none">
+                      {s.step}
+                    </span>
+                    <div className="h-16 w-16 rounded-2xl bg-navy flex items-center justify-center text-2xl mb-5 shadow-lg shadow-navy/20 group-hover:bg-royal transition-all duration-300">
+                      {s.emoji}
+                    </div>
+                    <h3 className="font-bold text-navy text-lg mb-2">{s.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
+                  </div>
+                </AnimateIn>
+              ))}
+            </div>
+          )}
+
         </div>
       </section>
 

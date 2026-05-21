@@ -23,6 +23,16 @@ export interface passwordChangeReqest {
   newPassword: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   token: string;
   id: string;
@@ -156,6 +166,7 @@ export interface Booking {
     | "CANCELLED";
   customerNote?: string;
   adminNote?: string;
+  receiptUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }

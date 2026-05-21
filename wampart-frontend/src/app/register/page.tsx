@@ -128,10 +128,10 @@ export default function RegisterPage() {
           src="/Image.png"
           fill
           alt=""
-          className="object-cover object-center ken-burns"
+          className="object-cover object-center ken-burns scale-105 blur-sm"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-black/92 via-black/60 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/92 via-black/65 to-black/90" />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" />
       </div>

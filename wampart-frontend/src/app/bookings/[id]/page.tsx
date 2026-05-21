@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { Car, Calendar, MapPin, FileText, AlertTriangle, XCircle } from "lucide-react"
+import { Car, Calendar, MapPin, FileText, AlertTriangle, XCircle, Download } from "lucide-react"
 import { CustomerLayout } from "@/components/customer-layout"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/status-badge"
 import { bookingService } from "@/services/bookingServices"
 import { Booking } from "@/types"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 function formatDate(iso: string) {
   try { return format(new Date(iso), "MMM d, yyyy") } catch { return iso }
@@ -32,6 +33,7 @@ export default function BookingDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [cancelling, setCancelling] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     bookingService
@@ -47,14 +49,28 @@ export default function BookingDetailPage() {
     try {
       const updated = await bookingService.cancelBooking(booking.id)
       setBooking(updated)
+      toast.success("Booking cancelled successfully.")
     } catch {
-      setError("Failed to cancel booking. Please try again.")
+      toast.error("Failed to cancel booking. Please try again.")
     } finally {
       setCancelling(false)
     }
   }
 
   const canCancel = booking?.bookingStatus === "PENDING" || booking?.bookingStatus === "CONFIRMED"
+
+  const handleOpenReceipt = async () => {
+    if (!booking) return
+    setDownloading(true)
+    try {
+      const url = await bookingService.getReceiptUrl(booking.id)
+      window.open(url, "_blank", "noopener,noreferrer")
+    } catch {
+      toast.error("Receipt not yet available. Please contact support.")
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   return (
     <CustomerLayout
@@ -84,7 +100,7 @@ export default function BookingDetailPage() {
             <div className="bg-white rounded-xl border border-light-gray p-5 mb-4 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h1 className="text-xl font-bold text-navy">
                       {booking.carBrand && booking.carModel
                         ? `${booking.carBrand} ${booking.carModel}`
@@ -95,11 +111,23 @@ export default function BookingDetailPage() {
                   <p className="text-sm text-muted-foreground font-mono">{booking.bookingReference}</p>
                   <p className="text-xs text-muted-foreground mt-1">Booked on {formatDate(booking.createdAt)}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end gap-2">
                   <p className="text-2xl font-bold text-royal">KES {(booking.bookingCost ?? 0).toLocaleString()}</p>
                   <p className="text-xs text-muted-foreground">
                     {booking.numberOfDays} day{booking.numberOfDays !== 1 ? "s" : ""} × KES {booking.pricePerDay.toLocaleString()}
                   </p>
+                  {(booking.bookingStatus === "CONFIRMED" || booking.bookingStatus === "COMPLETED") && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleOpenReceipt}
+                      disabled={downloading}
+                      className="border-royal/30 text-royal hover:bg-royal/5 gap-1.5 text-xs h-8"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      {downloading ? "Loading…" : "View Receipt"}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

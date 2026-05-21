@@ -21,6 +21,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { CustomerLayout } from "@/components/customer-layout";
 import useAuthStore from "@/store/authStore";
 import { bookingService } from "@/services/bookingServices";
+import { profileService } from "@/services/profileService";
 import { Booking } from "@/types";
 import { format } from "date-fns";
 
@@ -76,11 +77,17 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [greeting, setGreeting] = useState("");
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
     setGreeting(getGreeting());
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      profileService.getMyProfile(user.id).then(setUser).catch(() => {})
+    }
   }, []);
 
   const STATIC_ACTIONS = [

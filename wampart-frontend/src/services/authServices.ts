@@ -4,6 +4,8 @@ import {
   AuthResponse,
   RegisterRequest,
   passwordChangeReqest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
 } from "@/types";
 
 export const authService = {
@@ -23,7 +25,16 @@ export const authService = {
       "/auth/security/change-password",
       data,
     );
+    return response.data;
+  },
 
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<string> => {
+    const response = await axiosInstance.post("/auth/forgot-password", data);
+    return response.data;
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<string> => {
+    const response = await axiosInstance.post("/auth/reset-password", data);
     return response.data;
   },
 };

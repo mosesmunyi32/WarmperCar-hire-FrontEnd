@@ -123,12 +123,10 @@ export default function LoginPage() {
           src="/Warmpart car background.jpg"
           fill
           alt=""
-          className="object-cover object-center"
+          className="object-cover object-center scale-105 blur-sm"
           priority
         />
-        {/* Dark gradient overlay — heavier at top and bottom, lighter in the centre
-            so the car in the image stays visible behind the form */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/60 to-black/90" />
         {/* Side darkening for focus */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
       </div>
@@ -243,6 +241,14 @@ export default function LoginPage() {
                     {errors.password.message}
                   </p>
                 )}
+                <div className="flex justify-end mt-1.5">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-white/30 hover:text-gold transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               <Button

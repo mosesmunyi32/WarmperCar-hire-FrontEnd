@@ -11,6 +11,7 @@ import {
   Gauge,
   CheckCircle2,
   XCircle,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ export default function AdminBookingDetailPage() {
   const [savingMileageEnd, setSavingMileageEnd] = useState(false);
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [generatingReceipt, setGeneratingReceipt] = useState(false);
 
   useEffect(() => {
     bookingService
@@ -139,6 +141,20 @@ export default function AdminBookingDetailPage() {
     }
   };
 
+  const handleGenerateReceipt = async () => {
+    if (!booking) return;
+    setGeneratingReceipt(true);
+    try {
+      const url = await bookingService.generateReceipt(booking.id);
+      setBooking((b) => b ? { ...b, receiptUrl: url } : b);
+      toast.success("Receipt generated.");
+    } catch {
+      toast.error("Failed to generate receipt.");
+    } finally {
+      setGeneratingReceipt(false);
+    }
+  };
+
   const handleSaveNote = async () => {
     if (!booking) return;
     setSavingNote(true);
@@ -210,7 +226,30 @@ export default function AdminBookingDetailPage() {
           </h1>
           <p className="text-muted-foreground text-sm mt-1">{carFull}</p>
         </div>
-        <StatusBadge status={booking.bookingStatus} />
+        <div className="flex items-center gap-3 flex-wrap">
+          <StatusBadge status={booking.bookingStatus} />
+          {booking.receiptUrl ? (
+            <a
+              href={booking.receiptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium h-8 px-3 rounded-md border border-royal/30 text-royal hover:bg-royal/5 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" /> Open Receipt
+            </a>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleGenerateReceipt}
+              disabled={generatingReceipt}
+              className="border-royal/30 text-royal hover:bg-royal/5 gap-1.5 text-xs h-8"
+            >
+              <Download className="h-3.5 w-3.5" />
+              {generatingReceipt ? "Generating…" : "Generate Receipt"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {!booking.mileageStart && (booking.bookingStatus === "PENDING" || booking.bookingStatus === "CONFIRMED") && (
@@ -364,6 +403,15 @@ export default function AdminBookingDetailPage() {
           <h2 className="font-semibold text-navy text-sm mb-3">
             Booking Actions
           </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            Before approving, confirm the customer&apos;s identity and verify payment has been received.{" "}
+            <Link
+              href={`/admin/customers/${booking.userId}`}
+              className="text-royal hover:underline"
+            >
+              View customer details
+            </Link>
+          </p>
           <div className="flex gap-3 flex-wrap">
             <Button
               onClick={handleApprove}

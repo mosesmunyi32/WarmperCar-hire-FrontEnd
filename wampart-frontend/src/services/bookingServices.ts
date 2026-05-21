@@ -71,4 +71,14 @@ export const bookingService = {
     const response = await axiosInstance.get(`/admin/bookings/customer/${userId}`);
     return response.data;
   },
+
+  generateReceipt: async (bookingId: string): Promise<string> => {
+    const response = await axiosInstance.post(`/admin/bookings/${bookingId}/generate-receipt`);
+    return response.data;
+  },
+
+  getReceiptUrl: async (bookingId: string): Promise<string> => {
+    const response = await axiosInstance.get(`/bookings/${bookingId}/receipt`);
+    return response.data;
+  },
 };
