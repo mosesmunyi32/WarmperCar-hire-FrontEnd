@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { Car, Calendar, MapPin, FileText, AlertTriangle, XCircle, Download } from "lucide-react"
+import { Car, Calendar, MapPin, FileText, AlertTriangle, XCircle, Download, Fuel, Settings2, Users, Palette } from "lucide-react"
 import { CustomerLayout } from "@/components/customer-layout"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/status-badge"
 import { bookingService } from "@/services/bookingServices"
-import { Booking } from "@/types"
+import { carService } from "@/services/carServices"
+import { Booking, Car as CarType } from "@/types"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import Image from "next/image"
 
 function formatDate(iso: string) {
   try { return format(new Date(iso), "MMM d, yyyy") } catch { return iso }
@@ -30,6 +32,7 @@ function DetailSkeleton() {
 export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [booking, setBooking] = useState<Booking | null>(null)
+  const [car, setCar] = useState<CarType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [cancelling, setCancelling] = useState(false)
@@ -38,7 +41,10 @@ export default function BookingDetailPage() {
   useEffect(() => {
     bookingService
       .getBookingById(id)
-      .then(setBooking)
+      .then((b) => {
+        setBooking(b)
+        carService.getCarById(b.carId).then(setCar).catch(() => {})
+      })
       .catch(() => setError("Failed to load booking details."))
       .finally(() => setLoading(false))
   }, [id])
@@ -127,6 +133,75 @@ export default function BookingDetailPage() {
                       <Download className="h-3.5 w-3.5" />
                       {downloading ? "Loading…" : "View Receipt"}
                     </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Car Details */}
+            <div className="bg-white rounded-xl border border-light-gray mb-4 shadow-sm overflow-hidden">
+              <div className="flex flex-col sm:flex-row">
+                {/* Image */}
+                <div className="sm:w-48 h-36 sm:h-auto bg-gradient-to-br from-navy to-royal flex items-center justify-center shrink-0 relative">
+                  {car?.images?.[0] ? (
+                    <Image
+                      src={car.images[0]}
+                      alt={`${car.brand} ${car.model}`}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <Car className="h-16 w-16 text-white/20" />
+                  )}
+                  <div className="absolute bottom-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+                </div>
+
+                {/* Info */}
+                <div className="p-5 flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <h2 className="font-bold text-navy text-base">
+                        {car ? `${car.brand} ${car.model}` : `${booking.carBrand ?? ""} ${booking.carModel ?? ""}`.trim() || "Vehicle"}
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {car?.yearOfManufacture && `${car.yearOfManufacture} · `}
+                        {booking.carNumberPlate ?? car?.numberPlate}
+                      </p>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                      car?.isAvailable
+                        ? "bg-success/10 text-success border border-success/20"
+                        : "bg-muted text-muted-foreground border border-light-gray"
+                    }`}>
+                      {car?.isAvailable ? "Available" : "In Use"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { icon: Fuel, label: "Fuel", value: car?.typeOfFuel },
+                      { icon: Settings2, label: "Trans.", value: car?.transmission },
+                      { icon: Users, label: "Seats", value: car?.numberOfPassengers ? `${car.numberOfPassengers}` : undefined },
+                      { icon: Palette, label: "Color", value: car?.color },
+                    ].map(({ icon: Icon, label, value }) =>
+                      value ? (
+                        <div key={label} className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-lg bg-off-white border border-light-gray flex items-center justify-center shrink-0">
+                            <Icon className="h-3.5 w-3.5 text-royal" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[10px] text-muted-foreground leading-none">{label}</p>
+                            <p className="text-xs font-semibold text-navy truncate capitalize">{value.toLowerCase()}</p>
+                          </div>
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+
+                  {car?.description && (
+                    <p className="text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-2">
+                      {car.description}
+                    </p>
                   )}
                 </div>
               </div>

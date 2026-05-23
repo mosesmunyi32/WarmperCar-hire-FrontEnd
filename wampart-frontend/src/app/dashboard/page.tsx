@@ -223,8 +223,9 @@ export default function CustomerDashboard() {
                   Your account is not yet verified
                 </p>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                  Upload your <strong className="text-navy font-semibold">National ID photos</strong> (front &amp; back) to confirm bookings
-                  and unlock full access. It only takes a minute.
+                  {"Upload your "}
+                  <strong className="text-navy font-semibold">National ID photos</strong>
+                  {" (front & back) to confirm bookings and unlock full access. It only takes a minute."}
                 </p>
               </div>
               <Link href={`/profile/${user?.id}`} className="shrink-0">

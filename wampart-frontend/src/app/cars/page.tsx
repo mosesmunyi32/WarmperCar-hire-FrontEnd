@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/button";
 import { carService } from "@/services/carServices";
 import { Car as CarType } from "@/types";
 
+function isInUseNow(ranges: { startDate: string; endDate: string }[]): boolean {
+  const now = new Date()
+  return ranges.some((r) => now >= new Date(r.startDate) && now <= new Date(r.endDate))
+}
+
 export default function CarsPage() {
   const [cars, setCars] = useState<CarType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,11 +24,26 @@ export default function CarsPage() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [passengersFilter, setPassengersFilter] = useState("Any");
+  const [inUseMap, setInUseMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     carService
       .getAllAvailableCars()
-      .then(setCars)
+      .then((data) => {
+        setCars(data);
+        Promise.all(
+          data.map((car) =>
+            carService
+              .getBookedDateRanges(car.id)
+              .then((ranges) => ({ id: car.id, inUse: isInUseNow(ranges) }))
+              .catch(() => ({ id: car.id, inUse: false }))
+          )
+        ).then((results) => {
+          const map: Record<string, boolean> = {};
+          results.forEach((r) => { map[r.id] = r.inUse; });
+          setInUseMap(map);
+        });
+      })
       .catch(() => setError("Failed to load cars. Please refresh."))
       .finally(() => setLoading(false));
   }, []);
@@ -188,12 +208,18 @@ export default function CarsPage() {
                     <Car className="h-20 w-20 text-navy/15 group-hover:text-royal/25 transition-colors" />
                     <span
                       className={`absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full ${
-                        car.isAvailable
-                          ? "bg-success text-white"
-                          : "bg-muted-foreground text-white"
+                        !car.isAvailable || inUseMap[car.id]
+                          ? inUseMap[car.id]
+                            ? "bg-warning text-white"
+                            : "bg-muted-foreground text-white"
+                          : "bg-success text-white"
                       }`}
                     >
-                      {car.isAvailable ? "Available" : "Booked"}
+                      {!car.isAvailable
+                        ? "Unavailable"
+                        : inUseMap[car.id]
+                        ? "In Use"
+                        : "Available"}
                     </span>
                   </div>
                   <div className="p-4">
@@ -230,7 +256,7 @@ export default function CarsPage() {
                       <Link href={`/cars/${car.id}`}>
                         <Button
                           size="sm"
-                          disabled={!car.isAvailable}
+                          disabled={!car.isAvailable || inUseMap[car.id]}
                           className="bg-navy hover:bg-royal text-white"
                         >
                           View & Book

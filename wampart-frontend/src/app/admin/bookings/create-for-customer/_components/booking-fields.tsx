@@ -1,6 +1,12 @@
 import { Input } from "@/components/ui/input"
 import { BookingForm, GL, GI } from "./types"
 
+const nowLocal = () => {
+  const d = new Date()
+  d.setSeconds(0, 0)
+  return d.toISOString().slice(0, 16)
+}
+
 export function BookingFields({
   form,
   onChange,
@@ -8,26 +14,29 @@ export function BookingFields({
   form: BookingForm
   onChange: (k: keyof BookingForm, v: string) => void
 }) {
+  const minNow = nowLocal()
   return (
     <>
       <div>
         <label className={GL}>
-          Start Date & Time <span className="text-danger">*</span>
+          Pick-up Date & Time <span className="text-danger">*</span>
         </label>
         <Input
           type="datetime-local"
           value={form.startDate}
+          min={minNow}
           onChange={(e) => onChange("startDate", e.target.value)}
           className={GI}
         />
       </div>
       <div>
         <label className={GL}>
-          End Date & Time <span className="text-danger">*</span>
+          Return Date & Time <span className="text-danger">*</span>
         </label>
         <Input
           type="datetime-local"
           value={form.endDate}
+          min={form.startDate || minNow}
           onChange={(e) => onChange("endDate", e.target.value)}
           className={GI}
         />

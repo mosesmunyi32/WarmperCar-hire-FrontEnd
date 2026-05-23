@@ -71,11 +71,15 @@ export const carService = {
 
   deleteCarImage: async (id: string, imageUrl: string): Promise<AdminCar> => {
     const response = await axiosInstance.delete(`/admin/cars/${id}/images`, {
-      params: {
-        imageUrl,
-      },
+      params: { imageUrl },
     });
+    return response.data;
+  },
 
+  getBookedDateRanges: async (
+    carId: string,
+  ): Promise<{ startDate: string; endDate: string }[]> => {
+    const response = await axiosInstance.get(`/cars/${carId}/booked-dates`);
     return response.data;
   },
 };

@@ -13,6 +13,8 @@ import {
   MapPin,
   FileText,
   XCircle,
+  ShieldAlert,
+  Clock3,
 } from "lucide-react"
 import { CustomerLayout } from "@/components/customer-layout"
 import { Button } from "@/components/ui/button"
@@ -20,7 +22,9 @@ import { Input } from "@/components/ui/input"
 import { DateRangePicker } from "@/components/ui/date-range-picker"
 import { carService } from "@/services/carServices"
 import { bookingService } from "@/services/bookingServices"
+import { profileService } from "@/services/profileService"
 import { Car as CarType } from "@/types"
+import useAuthStore from "@/store/authStore"
 
 function CarDetailSkeleton() {
   return (
@@ -39,6 +43,7 @@ function CarDetailSkeleton() {
 export default function CarDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const { user, setUser } = useAuthStore()
   const [car, setCar] = useState<CarType | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -48,6 +53,7 @@ export default function CarDetailPage() {
   const [note, setNote] = useState("")
   const [isBooking, setIsBooking] = useState(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
+  const [bookedRanges, setBookedRanges] = useState<{ startDate: string; endDate: string }[]>([])
 
   useEffect(() => {
     carService
@@ -55,16 +61,24 @@ export default function CarDetailPage() {
       .then(setCar)
       .catch(() => setLoadError("Failed to load car details."))
       .finally(() => setLoading(false))
+
+    carService
+      .getBookedDateRanges(id)
+      .then(setBookedRanges)
+      .catch(() => {})
   }, [id])
+
+  useEffect(() => {
+    if (user?.id) {
+      profileService.getMyProfile(user.id).then(setUser).catch(() => {})
+    }
+  }, [])
 
   const days =
     startDate && endDate
-      ? Math.max(
-          0,
-          Math.ceil(
-            (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000,
-          ),
-        )
+      ? Math.max(1, Math.ceil(
+          (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000,
+        ))
       : 0
   const totalCost = car ? days * car.pricePerDay : 0
 
@@ -193,84 +207,127 @@ export default function CarDetailPage() {
                   </p>
                 </div>
 
-                {bookingError && (
-                  <div className="mx-5 mt-4 bg-danger/10 border border-danger/20 text-danger text-xs rounded-lg px-3 py-2">
-                    {bookingError}
+                {/* Verification gate */}
+                {!user?.isVerified ? (
+                  <div className="p-5">
+                    {user?.idFrontPhoto && user?.idBackPhoto ? (
+                      <div className="flex flex-col items-center gap-3 py-4 text-center">
+                        <div className="h-12 w-12 rounded-xl bg-azure/10 border border-azure/20 flex items-center justify-center">
+                          <Clock3 className="h-6 w-6 text-azure" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-navy text-sm">Verification pending</p>
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            Your ID documents are under review. Our team will verify your account within 24 hours — then you can book.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 py-4 text-center">
+                        <div className="h-12 w-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+                          <ShieldAlert className="h-6 w-6 text-gold" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-navy text-sm">Verification required</p>
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            You must upload your National ID and be verified by our team before you can make a booking.
+                          </p>
+                        </div>
+                        <Link href={`/profile/${user?.id}`} className="w-full">
+                          <Button className="w-full h-10 bg-gold text-navy hover:bg-gold/90 font-bold gap-2">
+                            Upload ID to Get Verified
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <>
+                    {bookingError && (
+                      <div className="mx-5 mt-4 bg-danger/10 border border-danger/20 text-danger text-xs rounded-lg px-3 py-2">
+                        {bookingError}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleBook} className="p-5 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-navy mb-1.5 flex items-center gap-1.5">
+                          <Calendar className="h-4 w-4" /> Pick Up → Return Dates
+                        </label>
+                        <DateRangePicker
+                          startDate={startDate}
+                          endDate={endDate}
+                          bookedRanges={bookedRanges}
+                          onRangeChange={(start, end) => {
+                            setStartDate(start)
+                            setEndDate(end)
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-navy mb-1.5 flex items-center gap-1.5">
+                          <MapPin className="h-4 w-4" /> Travel Destination
+                        </label>
+                        <Input
+                          placeholder="e.g. Mombasa"
+                          value={destination}
+                          onChange={(e) => setDestination(e.target.value)}
+                          className="h-10"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-navy mb-1.5 flex items-center gap-1.5">
+                          <FileText className="h-4 w-4" /> Notes{" "}
+                          <span className="font-normal text-muted-foreground">(Optional)</span>
+                        </label>
+                        <Input
+                          placeholder="Any special requests..."
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          className="h-10"
+                        />
+                      </div>
+
+                      {days > 0 && (
+                        <div className="bg-off-white rounded-lg p-3 border border-light-gray space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Pick-up</span>
+                            <span className="font-medium text-navy">
+                              {startDate.length >= 16 ? startDate.slice(0, 16).replace("T", " ") : ""}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Return</span>
+                            <span className="font-medium text-navy">
+                              {endDate.length >= 16 ? endDate.slice(0, 16).replace("T", " ") : ""}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Duration</span>
+                            <span className="font-medium text-navy">{days} day{days !== 1 ? "s" : ""}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Rate</span>
+                            <span className="font-medium text-navy">KES {car.pricePerDay.toLocaleString()} /day</span>
+                          </div>
+                          <div className="border-t border-light-gray pt-1 mt-1 flex justify-between">
+                            <span className="font-semibold text-navy">Total</span>
+                            <span className="font-bold text-royal text-base">KES {totalCost.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <Button
+                        type="submit"
+                        disabled={isBooking || !car.isAvailable || !startDate || !endDate || !destination}
+                        className="w-full h-11 bg-navy hover:bg-royal font-semibold gap-2"
+                      >
+                        {isBooking ? "Booking..." : "Book This Car →"}
+                      </Button>
+                    </form>
+                  </>
                 )}
-
-                <form onSubmit={handleBook} className="p-5 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-navy mb-1.5 flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" /> Pick Up → Return Dates
-                    </label>
-                    <DateRangePicker
-                      startDate={startDate}
-                      endDate={endDate}
-                      onRangeChange={(start, end) => {
-                        setStartDate(start)
-                        setEndDate(end)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-navy mb-1.5 flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4" /> Travel Destination
-                    </label>
-                    <Input
-                      placeholder="e.g. Mombasa"
-                      value={destination}
-                      onChange={(e) => setDestination(e.target.value)}
-                      className="h-10"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-navy mb-1.5 flex items-center gap-1.5">
-                      <FileText className="h-4 w-4" /> Notes{" "}
-                      <span className="font-normal text-muted-foreground">(Optional)</span>
-                    </label>
-                    <Input
-                      placeholder="Any special requests..."
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      className="h-10"
-                    />
-                  </div>
-
-                  {days > 0 && (
-                    <div className="bg-off-white rounded-lg p-3 border border-light-gray space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Duration</span>
-                        <span className="font-medium text-navy">
-                          {days} day{days !== 1 ? "s" : ""}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Rate</span>
-                        <span className="font-medium text-navy">
-                          KES {car.pricePerDay.toLocaleString()} /day
-                        </span>
-                      </div>
-                      <div className="border-t border-light-gray pt-1 mt-1 flex justify-between">
-                        <span className="font-semibold text-navy">Total</span>
-                        <span className="font-bold text-royal text-base">
-                          KES {totalCost.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button
-                    type="submit"
-                    disabled={
-                      isBooking || !car.isAvailable || !startDate || !endDate || !destination
-                    }
-                    className="w-full h-11 bg-navy hover:bg-royal font-semibold gap-2"
-                  >
-                    {isBooking ? "Booking..." : "Book This Car →"}
-                  </Button>
-                </form>
               </div>
             </div>
           </div>
