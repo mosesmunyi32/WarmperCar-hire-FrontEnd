@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, XCircle } from "lucide-react";
@@ -14,6 +14,14 @@ import { bookingService } from "@/services/bookingServices";
 import { Booking } from "@/types";
 
 export default function MyBookingsPage() {
+  return (
+    <Suspense>
+      <MyBookingsContent />
+    </Suspense>
+  );
+}
+
+function MyBookingsContent() {
   const searchParams = useSearchParams();
   const statusParam = searchParams.get("status")?.toUpperCase() as BookingTab | null;
   const initialTab: BookingTab =
