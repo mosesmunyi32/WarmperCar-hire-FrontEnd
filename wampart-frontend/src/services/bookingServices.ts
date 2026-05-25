@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import { AdminBooking, AdminBookingRequest, AdminDirectBookingRequest, Booking, BookingRequest } from "@/types";
+import { AdminBooking, AdminBookingRequest, AdminDirectBookingRequest, Booking, BookingHistoryResponse, BookingRequest } from "@/types";
 
 export const bookingService = {
   createBooking: async (data: BookingRequest): Promise<Booking> => {
@@ -69,6 +69,26 @@ export const bookingService = {
   },
   getCustomerBookings: async (userId: string): Promise<AdminBooking[]> => {
     const response = await axiosInstance.get(`/admin/bookings/customer/${userId}`);
+    return response.data;
+  },
+  getCarBookings: async (carId: string): Promise<AdminBooking[]> => {
+    const response = await axiosInstance.get(`/admin/bookings/car/${carId}`);
+    return response.data;
+  },
+  reassignCar: async (bookingId: string, numberPlate: string, adminNote?: string): Promise<AdminBooking> => {
+    const response = await axiosInstance.patch(`/admin/bookings/${bookingId}/reassign`, { newCarNumberPlate: numberPlate, ...(adminNote ? { adminNote } : {}) });
+    return response.data;
+  },
+  getMyBookingHistory: async (): Promise<BookingHistoryResponse[]> => {
+    const response = await axiosInstance.get("/bookings/my-booking-history");
+    return response.data;
+  },
+  getCarBookingHistory: async (carId: string): Promise<BookingHistoryResponse[]> => {
+    const response = await axiosInstance.get(`/admin/cars/${carId}/booking-history`);
+    return response.data;
+  },
+  getUserBookingHistory: async (userId: string): Promise<BookingHistoryResponse[]> => {
+    const response = await axiosInstance.get(`/admin/customers/${userId}/booking-history`);
     return response.data;
   },
 

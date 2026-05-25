@@ -55,16 +55,24 @@ export function ProfileInfoCard() {
 
   const handleSave = async () => {
     if (!user?.id) return;
+
+    // Validate required fields (@NonNull on backend)
+    if (!form.phoneNumber.trim()) { setError("Phone number is required."); return; }
+    if (!form.dateOfBirth) { setError("Date of birth is required."); return; }
+    if (!user.gender && !form.gender) { setError("Gender is required."); return; }
+    if (!form.county.trim()) { setError("County is required."); return; }
+    if (!form.city.trim()) { setError("City is required."); return; }
+
     setSaving(true);
     setError(null);
     try {
       await profileService.updateProfile(user.id, {
-        phoneNumber: form.phoneNumber || undefined,
-        alternativePhoneNumber: form.alternativePhoneNumber || undefined,
-        dateOfBirth: form.dateOfBirth || undefined,
+        phoneNumber: form.phoneNumber.trim(),
+        alternativePhoneNumber: form.alternativePhoneNumber.trim() || undefined,
+        dateOfBirth: form.dateOfBirth,
         gender: !user.gender ? form.gender || undefined : undefined,
-        county: form.county || undefined,
-        city: form.city || undefined,
+        county: form.county.trim(),
+        city: form.city.trim(),
       });
       const updated = await profileService.getMyProfile(user.id);
       setUser(updated);
@@ -134,15 +142,16 @@ export function ProfileInfoCard() {
             label="Phone Number"
             value={user?.phoneNumber}
             editValue={form.phoneNumber}
-            placeholder="+254 700 000 000"
+            placeholder="0712 345 678"
             isEditing={isEditing}
             onChange={(v) => setForm((f) => ({ ...f, phoneNumber: v }))}
+            required
           />
           <SmartField
             label="Alternative Phone"
             value={user?.alternativePhoneNumber}
             editValue={form.alternativePhoneNumber}
-            placeholder="+254 700 000 000"
+            placeholder="0712 345 678"
             isEditing={isEditing}
             onChange={(v) =>
               setForm((f) => ({ ...f, alternativePhoneNumber: v }))
@@ -152,6 +161,7 @@ export function ProfileInfoCard() {
           <div>
             <label className="block text-xs text-muted-foreground mb-1">
               Date of Birth
+              {isEditing && <span className="text-danger ml-0.5">*</span>}
             </label>
             {isEditing ? (
               <DatePicker
@@ -173,6 +183,7 @@ export function ProfileInfoCard() {
             <div>
               <label className="block text-xs text-muted-foreground mb-1">
                 Gender
+                <span className="text-danger ml-0.5">*</span>
               </label>
               <select
                 value={form.gender}
@@ -198,6 +209,7 @@ export function ProfileInfoCard() {
             placeholder="e.g. Nairobi"
             isEditing={isEditing}
             onChange={(v) => setForm((f) => ({ ...f, county: v }))}
+            required
           />
 
           <SmartField
@@ -207,6 +219,7 @@ export function ProfileInfoCard() {
             placeholder="e.g. Westlands"
             isEditing={isEditing}
             onChange={(v) => setForm((f) => ({ ...f, city: v }))}
+            required
           />
         </div>
       </SectionCard>

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { customerServices } from "@/services/customerServices";
 import { bookingService } from "@/services/bookingServices";
 import { profileService } from "@/services/profileService";
-import { UserResponse, AdminBooking } from "@/types";
+import { UserResponse, AdminBooking, BookingHistoryResponse } from "@/types";
 import { EditForm, EDIT_FORM_INIT } from "./_components/types";
 import { PhotoModal } from "./_components/photo-modal";
 import { CustomerHeader } from "./_components/customer-header";
@@ -21,6 +21,7 @@ export default function CustomerDetailPage() {
 
   const [customer, setCustomer] = useState<UserResponse | null>(null);
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
+  const [bookingHistory, setBookingHistory] = useState<BookingHistoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [photoModal, setPhotoModal] = useState<string | null>(null);
@@ -42,8 +43,9 @@ export default function CustomerDetailPage() {
       customerServices.getCustomer(id),
       bookingService.getCustomerBookings(id).catch(() => [] as AdminBooking[]),
       profileService.getMyProfile(id).catch(() => null as UserResponse | null),
+      bookingService.getUserBookingHistory(id).catch(() => [] as BookingHistoryResponse[]),
     ])
-      .then(([c, b, profile]) => {
+      .then(([c, b, profile, history]) => {
         setCustomer({
           ...c,
           idFrontPhoto: c.idFrontPhoto ?? profile?.idFrontPhoto ?? null,
@@ -51,6 +53,7 @@ export default function CustomerDetailPage() {
           profilePhoto: c.profilePhoto ?? profile?.profilePhoto ?? null,
         });
         setBookings(b);
+        setBookingHistory(history);
       })
       .catch(() => toast.error("Failed to load customer details."))
       .finally(() => setLoading(false));
@@ -323,7 +326,7 @@ export default function CustomerDetailPage() {
             onBackDelete={handleDeleteIdBack}
             onProfileDelete={handleDeleteProfilePhoto}
           />
-          <BookingHistory bookings={bookings} />
+          <BookingHistory bookings={bookings} history={bookingHistory} />
         </div>
       </div>
     </div>

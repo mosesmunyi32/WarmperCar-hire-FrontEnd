@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Car, Search, Fuel, Settings2, Users, XCircle } from "lucide-react";
+import { Car, Search, Fuel, Settings2, Users, XCircle, CalendarSearch } from "lucide-react";
 import { CustomerLayout } from "@/components/customer-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -229,7 +229,7 @@ export default function CarsPage() {
                     <p className="text-muted-foreground text-xs mb-3">
                       {car.yearOfManufacture}
                     </p>
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4">
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <Fuel className="h-3.5 w-3.5" />
                         {car.typeOfFuel}
@@ -243,6 +243,16 @@ export default function CarsPage() {
                         {car.numberOfPassengers} seats
                       </span>
                     </div>
+
+                    {inUseMap[car.id] && (
+                      <Link href={`/cars/${car.id}?openCalendar=true`} className="block mb-3">
+                        <div className="flex items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning hover:bg-warning/10 transition-colors">
+                          <CalendarSearch className="h-3.5 w-3.5 shrink-0" />
+                          <span>This car is in use today — click to check available dates</span>
+                        </div>
+                      </Link>
+                    )}
+
                     <div className="flex items-end justify-between">
                       <div>
                         <span className="text-royal font-bold text-lg">
@@ -253,13 +263,13 @@ export default function CarsPage() {
                           /day
                         </span>
                       </div>
-                      <Link href={`/cars/${car.id}`}>
+                      <Link href={inUseMap[car.id] ? `/cars/${car.id}?openCalendar=true` : `/cars/${car.id}`}>
                         <Button
                           size="sm"
-                          disabled={!car.isAvailable || inUseMap[car.id]}
+                          disabled={!car.isAvailable}
                           className="bg-navy hover:bg-royal text-white"
                         >
-                          View & Book
+                          {inUseMap[car.id] ? "See Dates" : "View & Book"}
                         </Button>
                       </Link>
                     </div>

@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const schema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  identifier: z.string().min(1, "Please enter your email or ID number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 type FormData = z.infer<typeof schema>;
@@ -64,12 +64,16 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { identifier: "", password: "" },
   });
 
   async function onSubmit(values: FormData) {
     try {
-      const response = await authService.login(values);
+      const id = values.identifier.trim();
+      const payload = id.includes("@")
+        ? { email: id, password: values.password }
+        : { idNumber: id, password: values.password };
+      const response = await authService.login(payload);
       setToken(response.token);
 
       const springRole = getRoleFromToken(response.token) ?? response.role;
@@ -146,7 +150,7 @@ export default function LoginPage() {
             <span className="text-gold">part</span>
           </h1>
 
-          <p className="text-white/30 text-xs tracking-[0.35em] uppercase mb-10">
+          <p className="text-white/55 text-xs tracking-[0.35em] uppercase mb-10">
             Premium Car Hire · Kenya
           </p>
 
@@ -189,33 +193,34 @@ export default function LoginPage() {
           <div className="backdrop-blur-2xl bg-white/[0.07] border border-white/[0.12] rounded-3xl p-8 shadow-2xl shadow-black/50">
             <div className="mb-7">
               <h2 className="text-2xl font-bold text-white">Welcome back</h2>
-              <p className="text-white/35 text-sm mt-1">
+              <p className="text-white/65 text-sm mt-1">
                 Sign in to continue your journey
               </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email */}
+              {/* Email or ID Number */}
               <div>
-                <label className="block text-[10px] font-semibold text-white/40 tracking-[0.2em] uppercase mb-2">
-                  Email
+                <label className="block text-[10px] font-semibold text-white/70 tracking-[0.2em] uppercase mb-2">
+                  Email or ID Number
                 </label>
                 <Input
-                  type="email"
-                  placeholder="you@example.com"
+                  type="text"
+                  placeholder="Email address or national ID"
+                  autoComplete="username"
                   className="h-11 bg-white/[0.06] border-white/[0.13] text-white placeholder:text-white/20 focus-visible:ring-gold/25 focus-visible:border-gold/45 rounded-xl"
-                  {...register("email")}
+                  {...register("identifier")}
                 />
-                {errors.email && (
+                {errors.identifier && (
                   <p className="text-danger text-xs mt-1.5">
-                    {errors.email.message}
+                    {errors.identifier.message}
                   </p>
                 )}
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-[10px] font-semibold text-white/40 tracking-[0.2em] uppercase mb-2">
+                <label className="block text-[10px] font-semibold text-white/70 tracking-[0.2em] uppercase mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -227,7 +232,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPw(!showPw)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/55 transition-colors"
                   >
                     {showPw ? (
                       <EyeOff className="h-4 w-4" />
@@ -244,7 +249,7 @@ export default function LoginPage() {
                 <div className="flex justify-end mt-1.5">
                   <Link
                     href="/forgot-password"
-                    className="text-xs text-white/30 hover:text-gold transition-colors"
+                    className="text-xs text-gold hover:text-gold/75 transition-colors"
                   >
                     Forgot password?
                   </Link>
@@ -260,7 +265,7 @@ export default function LoginPage() {
                 {!isSubmitting && <ArrowRight className="h-4 w-4" />}
               </Button>
 
-              <p className="text-center text-sm text-white/25 pt-1">
+              <p className="text-center text-sm text-white/50 pt-1">
                 No account yet?{" "}
                 <Link
                   href="/register"
@@ -272,7 +277,7 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <p className="text-center text-white/15 text-xs tracking-widest uppercase">
+          <p className="text-center text-white/40 text-xs tracking-widest uppercase">
             Secure · Encrypted · Trusted
           </p>
         </div>

@@ -13,6 +13,7 @@ interface DateRangePickerProps {
   endDate: string
   onRangeChange: (start: string, end: string) => void
   bookedRanges?: { startDate: string; endDate: string }[]
+  defaultOpen?: boolean
   className?: string
 }
 
@@ -39,9 +40,10 @@ export function DateRangePicker({
   endDate,
   onRangeChange,
   bookedRanges = [],
+  defaultOpen = false,
   className,
 }: DateRangePickerProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(defaultOpen)
   const [startHour, setStartHour] = useState(() => parseHour(startDate))
   const [startMin, setStartMin] = useState(() => parseMinute(startDate))
   const [endHour, setEndHour] = useState(() => parseHour(endDate))
@@ -51,10 +53,17 @@ export function DateRangePicker({
   const to = endDate ? new Date(endDate) : undefined
   const selected: DateRange = { from, to }
 
-  const blockedRanges: DateRange[] = bookedRanges.map((r) => ({
-    from: new Date(r.startDate),
-    to: new Date(r.endDate),
-  }))
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const blockedRanges: DateRange[] = bookedRanges
+    .map((r) => {
+      const end = new Date(r.endDate)
+      if (end < today) return null
+      const start = new Date(r.startDate)
+      return { from: start < today ? today : start, to: end }
+    })
+    .filter(Boolean) as DateRange[]
 
   const days =
     from && to
@@ -203,6 +212,20 @@ export function DateRangePicker({
                 orientation === "left"
                   ? <ChevronLeft className="h-3.5 w-3.5" />
                   : <ChevronRight className="h-3.5 w-3.5" />,
+              DayButton: ({ children, className, modifiers, ...props }) =>
+                modifiers.booked ? (
+                  <div className="relative group/bday inline-flex">
+                    <button className={className} {...props}>{children}</button>
+                    <span className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 z-50 hidden group-hover/bday:flex flex-col items-center">
+                      <span className="rounded-lg bg-navy px-2.5 py-1.5 text-[10px] text-white whitespace-nowrap shadow-lg leading-snug">
+                        This car is already booked
+                      </span>
+                      <span className="border-x-[5px] border-t-[5px] border-x-transparent border-t-navy" />
+                    </span>
+                  </div>
+                ) : (
+                  <button className={className} {...props}>{children}</button>
+                ),
             }}
           />
 

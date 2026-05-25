@@ -7,7 +7,6 @@ import {
   CalendarDays,
   User,
   Shield,
-  LogOut,
   ChevronRight,
 } from "lucide-react"
 import {
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/sidebar"
 import useAuthStore from "@/store/authStore"
 import { cn } from "@/lib/utils"
+import { UserMenu } from "@/components/user-menu"
 
 const NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -37,13 +37,8 @@ const NAV = [
 export function CustomerSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
   const { open } = useSidebar()
-
-  const handleLogout = () => {
-    logout()
-    router.push("/login")
-  }
 
   return (
     <Sidebar>
@@ -107,31 +102,9 @@ export function CustomerSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* User + Logout */}
+      {/* User menu */}
       <SidebarFooter>
-        <div className={cn("flex items-center gap-3 px-1 py-1 min-w-0", !open && "justify-center")}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-royal text-white text-xs font-semibold">
-            {user?.firstName?.[0]}{user?.lastName?.[0]}
-          </div>
-          <SidebarMenuLabel className="flex flex-col leading-none min-w-0">
-            <span className="text-sm font-medium text-navy truncate">
-              {user?.firstName} {user?.lastName}
-            </span>
-            <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
-          </SidebarMenuLabel>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            "text-muted-foreground hover:bg-danger/10 hover:text-danger",
-            !open && "justify-center px-2"
-          )}
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          <SidebarMenuLabel>Sign Out</SidebarMenuLabel>
-        </button>
+        <UserMenu collapsed={!open} />
       </SidebarFooter>
     </Sidebar>
   )

@@ -1,49 +1,40 @@
-import { Input } from "@/components/ui/input"
-import { BookingForm, GL, GI } from "./types"
+"use client"
 
-const nowLocal = () => {
-  const d = new Date()
-  d.setSeconds(0, 0)
-  return d.toISOString().slice(0, 16)
-}
+import { Calendar, MapPin, FileText } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { BookingForm, GL, GI } from "./types"
 
 export function BookingFields({
   form,
   onChange,
+  bookedRanges = [],
 }: {
   form: BookingForm
   onChange: (k: keyof BookingForm, v: string) => void
+  bookedRanges?: { startDate: string; endDate: string }[]
 }) {
-  const minNow = nowLocal()
   return (
     <>
-      <div>
-        <label className={GL}>
-          Pick-up Date & Time <span className="text-danger">*</span>
+      <div className="sm:col-span-2">
+        <label className={`${GL} flex items-center gap-1.5`}>
+          <Calendar className="h-3.5 w-3.5" /> Pick-up → Return Dates & Times{" "}
+          <span className="text-danger">*</span>
         </label>
-        <Input
-          type="datetime-local"
-          value={form.startDate}
-          min={minNow}
-          onChange={(e) => onChange("startDate", e.target.value)}
-          className={GI}
-        />
-      </div>
-      <div>
-        <label className={GL}>
-          Return Date & Time <span className="text-danger">*</span>
-        </label>
-        <Input
-          type="datetime-local"
-          value={form.endDate}
-          min={form.startDate || minNow}
-          onChange={(e) => onChange("endDate", e.target.value)}
-          className={GI}
+        <DateRangePicker
+          startDate={form.startDate}
+          endDate={form.endDate}
+          bookedRanges={bookedRanges}
+          onRangeChange={(start, end) => {
+            onChange("startDate", start)
+            onChange("endDate", end)
+          }}
         />
       </div>
       <div className="sm:col-span-2">
-        <label className={GL}>
-          Travel Destination <span className="text-danger">*</span>
+        <label className={`${GL} flex items-center gap-1.5`}>
+          <MapPin className="h-3.5 w-3.5" /> Travel Destination{" "}
+          <span className="text-danger">*</span>
         </label>
         <Input
           placeholder="e.g. Mombasa"
@@ -52,10 +43,12 @@ export function BookingFields({
           className={GI}
         />
       </div>
-<div className="sm:col-span-2">
+      <div className="sm:col-span-2">
         <label className={GL}>
-          Note{" "}
-          <span className="text-muted-foreground normal-case tracking-normal font-normal">(optional)</span>
+          <span className="flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" /> Note{" "}
+            <span className="text-muted-foreground normal-case tracking-normal font-normal">(optional)</span>
+          </span>
         </label>
         <textarea
           placeholder="Any additional notes…"

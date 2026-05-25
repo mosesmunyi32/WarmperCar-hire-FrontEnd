@@ -131,7 +131,7 @@ export function ProfilePhotoCard() {
               onClick={() => setIsEditing(true)}
               className="border-navy text-navy hover:bg-navy hover:text-white gap-1.5"
             >
-              <Camera className="h-3.5 w-3.5" /> Change Photo
+              <Camera className="h-3.5 w-3.5" /> {user?.profilePhoto ? "Change Photo" : "Upload Profile Photo"}
             </Button>
           ) : (
             <>

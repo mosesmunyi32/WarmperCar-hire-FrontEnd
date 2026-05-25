@@ -1,9 +1,13 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { ArrowLeft, ArrowRight, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AdminCar, AdminCreateCustomerResponse } from "@/types"
 import { BookingForm } from "./types"
 import { CarSelector } from "./car-selector"
 import { BookingFields } from "./booking-fields"
+import { carService } from "@/services/carServices"
 
 export function BookingStep({
   createdCustomer,
@@ -26,10 +30,17 @@ export function BookingStep({
   onSubmit: () => void
   submitting: boolean
 }) {
+  const [bookedRanges, setBookedRanges] = useState<{ startDate: string; endDate: string }[]>([])
+
+  useEffect(() => {
+    if (!selectedCar) { setBookedRanges([]); return }
+    carService.getBookedDateRanges(selectedCar.id).then(setBookedRanges).catch(() => {})
+  }, [selectedCar?.id])
+
   return (
     <div className="space-y-5">
       {createdCustomer && (
-        <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success/[0.06] px-5 py-4">
+        <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success/6 px-5 py-4">
           <div className="h-10 w-10 rounded-full bg-success/15 border border-success/25 flex items-center justify-center shrink-0 text-success font-bold text-sm">
             {createdCustomer.firstName[0]}{createdCustomer.lastName[0]}
           </div>
@@ -54,7 +65,7 @@ export function BookingStep({
           <div className="sm:col-span-2">
             <CarSelector cars={cars} value={selectedCar} onChange={onCarChange} />
           </div>
-          <BookingFields form={bookingForm} onChange={onBookingChange} />
+          <BookingFields form={bookingForm} onChange={onBookingChange} bookedRanges={bookedRanges} />
         </div>
       </div>
 

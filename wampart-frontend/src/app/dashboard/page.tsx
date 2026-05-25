@@ -131,6 +131,7 @@ export default function CustomerDashboard() {
       icon: CalendarDays,
       color: "text-royal",
       bg: "bg-royal/10",
+      href: "/bookings",
     },
     {
       label: "Active Bookings",
@@ -139,6 +140,7 @@ export default function CustomerDashboard() {
       icon: Car,
       color: "text-success",
       bg: "bg-success/10",
+      href: "/bookings?status=CONFIRMED",
     },
     {
       label: "Pending Approval",
@@ -147,6 +149,7 @@ export default function CustomerDashboard() {
       icon: Clock,
       color: "text-warning",
       bg: "bg-warning/10",
+      href: "/bookings?status=PENDING",
     },
   ];
 
@@ -250,27 +253,26 @@ export default function CustomerDashboard() {
           {loading
             ? [0, 1, 2].map((i) => <StatSkeleton key={i} />)
             : stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-white rounded-xl border border-light-gray p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {stat.label}
-                      </p>
-                      <p className="text-3xl font-bold text-navy mt-1">
-                        {stat.value}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {stat.sub}
-                      </p>
-                    </div>
-                    <div className={`${stat.bg} ${stat.color} p-3 rounded-lg`}>
-                      <stat.icon className="h-5 w-5" />
+                <Link key={stat.label} href={stat.href}>
+                  <div className="bg-white rounded-xl border border-light-gray p-5 shadow-sm hover:shadow-md hover:border-royal/30 transition-all cursor-pointer group">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground group-hover:text-navy transition-colors">
+                          {stat.label}
+                        </p>
+                        <p className="text-3xl font-bold text-navy mt-1">
+                          {stat.value}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {stat.sub}
+                        </p>
+                      </div>
+                      <div className={`${stat.bg} ${stat.color} p-3 rounded-lg group-hover:scale-110 transition-transform`}>
+                        <stat.icon className="h-5 w-5" />
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
         </div>
 

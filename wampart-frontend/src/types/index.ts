@@ -1,5 +1,6 @@
 export interface LoginRequest {
-  email: string;
+  email?: string;
+  idNumber?: string;
   password: string;
 }
 
@@ -24,11 +25,13 @@ export interface passwordChangeReqest {
 }
 
 export interface ForgotPasswordRequest {
-  email: string;
+  email?: string;
+  phoneNumber?: string;
 }
 
 export interface ResetPasswordRequest {
-  email: string;
+  email?: string;
+  phoneNumber?: string;
   otp: string;
   newPassword: string;
 }
@@ -238,9 +241,108 @@ export interface ApiError {
   timestamp: string;
 }
 
+export interface BookingHistoryResponse {
+  id: string;
+  bookingReference: string;
+  startDate: string;
+  endDate: string;
+  bookingStatus: "PENDING" | "CONFIRMED" | "REJECTED" | "COMPLETED" | "CANCELLED";
+  numberOfDays: number;
+  bookingCost: number | null;
+  carBrand?: string | null;
+  carModel?: string | null;
+  carYear?: number | null;
+  numberPlate?: string | null;
+  customerFirstName?: string | null;
+  customerLastName?: string | null;
+  customerEmail?: string | null;
+  customerPhoneNumber?: string | null;
+  inspectionComment?: string | null;
+  carWasDamaged?: boolean | null;
+  receiptUrl?: string | null;
+  createdAt: string;
+}
+
 export type UserListResponse = UserResponse[];
 export type CarListResponse = Car[];
 export type BookingListResponse = Booking[];
+
+export type InspectionType = "PRE_INSPECTION" | "POST_INSPECTION";
+export type InspectionStatus = "PENDING" | "COMPLETED";
+export type CustomerResponseStatus = "PENDING" | "CONFIRMED" | "REJECTED";
+export type CarCondition = "EXCELLENT" | "GOOD" | "FAIR" | "POOR";
+
+export interface AdminInspectionResponse {
+  id: string;
+  inspectionReference: string;
+  bookingId: string;
+  carNumberPlate: string;
+  carModel: string;
+  carBrand: string;
+  userFirstName: string;
+  userLastName: string;
+  userPhoneNumber: string;
+  userIdNumber: string;
+  inspectionType: InspectionType;
+  inspectionStatus: InspectionStatus;
+  condition: CarCondition;
+  isDamaged: boolean;
+  damagedPhotos: string[];
+  inspectionComment: string | null;
+  customerResponse: CustomerResponseStatus;
+  customerComment: string | null;
+  isDamageChargeRequired: boolean | null;
+  damageChargeAmount: number | null;
+  dateOfInspection: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomerInspectionResponse {
+  id: string;
+  inspectionReference: string;
+  bookingId: string;
+  carNumberPlate: string;
+  carModel: string;
+  carBrand: string;
+  inspectionType: InspectionType;
+  inspectionStatus: InspectionStatus;
+  condition: CarCondition;
+  isDamaged: boolean;
+  damagedPhotos: string[];
+  inspectionComment: string | null;
+  customerResponse: CustomerResponseStatus;
+  customerComment: string | null;
+  isDamageChargeRequired: boolean | null;
+  damageChargeAmount: number | null;
+  dateOfInspection: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateInspectionRequest {
+  bookingId: string;
+  condition: CarCondition;
+  isDamaged: boolean;
+  inspectionComment?: string;
+  damagedPhotos?: string[];
+  isDamageChargeRequired?: boolean;
+  damageChargeAmount?: number;
+}
+
+export interface UpdateInspectionRequest {
+  condition: CarCondition;
+  isDamaged: boolean;
+  inspectionComment?: string;
+  damagedPhotos?: string[];
+  isDamageChargeRequired?: boolean;
+  damageChargeAmount?: number;
+}
+
+export interface InspectionRespondRequest {
+  customerResponse: "CONFIRMED" | "REJECTED";
+  customerComment?: string;
+}
 
 export interface RegisterFormData {
   firstName: string;

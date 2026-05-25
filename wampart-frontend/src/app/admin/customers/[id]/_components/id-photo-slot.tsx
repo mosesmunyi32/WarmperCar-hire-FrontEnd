@@ -31,13 +31,15 @@ export function IdPhotoSlot({
       <p className="text-xs text-muted-foreground mb-1.5">{label}</p>
       <div className="relative group">
         {previewUrl ? (
-          <button
-            type="button"
+          <div
+            role={!stagedFile ? "button" : undefined}
+            tabIndex={!stagedFile ? 0 : undefined}
             onClick={() => !stagedFile && onView(previewUrl)}
+            onKeyDown={(e) => !stagedFile && e.key === "Enter" && onView(previewUrl)}
             className={cn(
               "w-full aspect-video rounded-lg border overflow-hidden relative",
               stagedFile
-                ? "border-warning/60 cursor-default"
+                ? "border-warning/60"
                 : "border-light-gray hover:border-royal transition-colors cursor-pointer",
             )}
           >
@@ -73,7 +75,7 @@ export function IdPhotoSlot({
                 <X className="h-3 w-3 text-muted-foreground" />
               </button>
             )}
-          </button>
+          </div>
         ) : (
           <div className="w-full aspect-video rounded-lg border border-dashed border-light-gray flex flex-col items-center justify-center gap-1 text-muted-foreground">
             <ImageIcon className="h-5 w-5" />

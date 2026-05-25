@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
   Car,
@@ -43,6 +43,8 @@ function CarDetailSkeleton() {
 export default function CarDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const openCalendar = searchParams.get("openCalendar") === "true"
   const { user, setUser } = useAuthStore()
   const [car, setCar] = useState<CarType | null>(null)
   const [loading, setLoading] = useState(true)
@@ -258,6 +260,7 @@ export default function CarDetailPage() {
                           startDate={startDate}
                           endDate={endDate}
                           bookedRanges={bookedRanges}
+                          defaultOpen={openCalendar}
                           onRangeChange={(start, end) => {
                             setStartDate(start)
                             setEndDate(end)

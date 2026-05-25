@@ -11,12 +11,12 @@ import {
   BarChart2,
   Crown,
   UserCog,
-  LogOut,
   ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import useAuthStore from "@/store/authStore"
 import { Separator } from "@/components/ui/separator"
+import { UserMenu } from "@/components/user-menu"
 import {
   SidebarProvider,
   Sidebar,
@@ -100,15 +100,9 @@ const DARK_VARS: React.CSSProperties = {
 // ─── Sidebar panel (needs to be inside SidebarProvider) ──────────────────────
 function AdminSidebarPanel() {
   const pathname = usePathname()
-  const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
   const { open } = useSidebar()
   const isSuperAdmin = user?.role === "SUPER_ADMIN"
-
-  const handleLogout = () => {
-    logout()
-    router.push("/login")
-  }
 
   return (
     <Sidebar style={DARK_VARS}>
@@ -152,32 +146,9 @@ function AdminSidebarPanel() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* User + Logout */}
+      {/* User menu */}
       <SidebarFooter>
-        <div className={cn("flex items-center gap-3 px-1 py-1 min-w-0", !open && "justify-center")}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-royal text-white text-xs font-semibold border border-white/20">
-            {user?.firstName?.[0]}
-            {user?.lastName?.[0]}
-          </div>
-          <SidebarMenuLabel className="flex flex-col leading-none min-w-0">
-            <span className="text-sm font-medium text-white truncate">
-              {user?.firstName} {user?.lastName}
-            </span>
-            <span className="text-xs text-white/40 truncate">{user?.role}</span>
-          </SidebarMenuLabel>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            "text-white/50 hover:bg-danger/20 hover:text-danger",
-            !open && "justify-center px-2",
-          )}
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          <SidebarMenuLabel>Sign Out</SidebarMenuLabel>
-        </button>
+        <UserMenu collapsed={!open} dark />
       </SidebarFooter>
     </Sidebar>
   )

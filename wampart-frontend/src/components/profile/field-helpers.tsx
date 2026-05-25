@@ -28,16 +28,21 @@ export function EditableField({
   placeholder,
   onChange,
   type = "text",
+  required,
 }: {
   label: string
   value: string
   placeholder?: string
   onChange: (v: string) => void
   type?: string
+  required?: boolean
 }) {
   return (
     <div>
-      <label className="block text-xs text-muted-foreground mb-1">{label}</label>
+      <label className="block text-xs text-muted-foreground mb-1">
+        {label}
+        {required && <span className="text-danger ml-0.5">*</span>}
+      </label>
       <Input
         type={type}
         value={value}
@@ -56,6 +61,7 @@ export function SmartField({
   placeholder,
   isEditing,
   onChange,
+  required,
 }: {
   label: string
   value: string | null | undefined
@@ -63,9 +69,10 @@ export function SmartField({
   placeholder?: string
   isEditing: boolean
   onChange: (v: string) => void
+  required?: boolean
 }) {
   if (!isEditing) return <DisabledField label={label} value={value ?? null} />
-  return <EditableField label={label} value={editValue ?? value ?? ""} placeholder={placeholder} onChange={onChange} />
+  return <EditableField label={label} value={editValue ?? value ?? ""} placeholder={placeholder} onChange={onChange} required={required} />
 }
 
 export function ConditionalField({
