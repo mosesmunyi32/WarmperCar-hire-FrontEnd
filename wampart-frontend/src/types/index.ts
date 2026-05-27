@@ -117,6 +117,7 @@ export interface Car {
   images: string[];
   pricePerDay: number;
   isAvailable: boolean;
+  isInUse?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -179,6 +180,7 @@ export interface AdminBooking extends Booking {
   extendedDays?: number;
   extendedDaysCost?: number;
   approvedBy?: string;
+  approvedByName?: string;
   mileageStart?: number;
   mileageEnd?: number;
 }
@@ -261,6 +263,37 @@ export interface BookingHistoryResponse {
   carWasDamaged?: boolean | null;
   receiptUrl?: string | null;
   createdAt: string;
+}
+
+export type ExtensionStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface BookingExtensionResponse {
+  id: string;
+  extensionReference: string;
+  bookingId: string;
+  userId: string;
+  requestedDays: number;
+  extensionCost: number | null;
+  extensionStatus: ExtensionStatus;
+  requestedAt: string;
+  adminNote: string | null;
+  customerNote: string | null;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookingExtensionRequest {
+  bookingId: string;
+  requestedDays: number;
+  customerNote?: string;
+}
+
+export interface ApproveBookingExtensionRequest {
+  extensionId: string;
+  extensionStatus: ExtensionStatus;
+  adminNote?: string;
 }
 
 export type UserListResponse = UserResponse[];

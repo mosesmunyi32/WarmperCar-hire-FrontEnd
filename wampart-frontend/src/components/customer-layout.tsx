@@ -1,8 +1,10 @@
 "use client"
 
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import type { ReactNode } from "react"
+import { useRouter } from "next/navigation"
 import { Separator } from "@/components/ui/separator"
+import useAuthStore from "@/store/authStore"
 import {
   SidebarProvider,
   SidebarInset,
@@ -30,6 +32,15 @@ export function CustomerLayout({
   children: ReactNode
   breadcrumbs: BreadcrumbEntry[]
 }) {
+  const router = useRouter()
+  const { isAuthenticated } = useAuthStore()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login")
+    }
+  }, [isAuthenticated, router])
+
   const today = new Date().toLocaleDateString("en-KE", {
     weekday: "long",
     month: "long",

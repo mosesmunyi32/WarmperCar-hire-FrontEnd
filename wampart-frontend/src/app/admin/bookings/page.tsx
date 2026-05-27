@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Gauge, Search, UserPlus, SlidersHorizontal, X, Car as CarIcon, AlertTriangle, Clock, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
@@ -196,7 +196,9 @@ function CarsOnTripList({
 
 export default function AdminBookingsPage() {
   const router = useRouter()
-  const [tab, setTab] = useState<PageTab>("PENDING")
+  const searchParams = useSearchParams()
+  const initialTab = (searchParams.get("tab") as PageTab | null) ?? "PENDING"
+  const [tab, setTab] = useState<PageTab>(initialTab)
   const [search, setSearch] = useState("")
   const [sortBy, setSortBy] = useState<SortOption>("newest")
   const [dateFrom, setDateFrom] = useState("")

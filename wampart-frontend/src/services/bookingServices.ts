@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import { AdminBooking, AdminBookingRequest, AdminDirectBookingRequest, Booking, BookingHistoryResponse, BookingRequest } from "@/types";
+import { AdminBooking, AdminBookingRequest, AdminDirectBookingRequest, ApproveBookingExtensionRequest, Booking, BookingExtensionRequest, BookingExtensionResponse, BookingHistoryResponse, BookingRequest } from "@/types";
 
 export const bookingService = {
   createBooking: async (data: BookingRequest): Promise<Booking> => {
@@ -99,6 +99,28 @@ export const bookingService = {
 
   getReceiptUrl: async (bookingId: string): Promise<string> => {
     const response = await axiosInstance.get(`/bookings/${bookingId}/receipt`);
+    return response.data;
+  },
+
+  // ── Extensions ──────────────────────────────────────────────────────────────
+  createExtension: async (data: BookingExtensionRequest): Promise<BookingExtensionResponse> => {
+    const response = await axiosInstance.post("/bookings/extensions", data);
+    return response.data;
+  },
+  getMyExtensions: async (): Promise<BookingExtensionResponse[]> => {
+    const response = await axiosInstance.get("/bookings/extensions/my-extensions");
+    return response.data;
+  },
+  getExtensionsByBookingId: async (bookingId: string): Promise<BookingExtensionResponse[]> => {
+    const response = await axiosInstance.get(`/admin/bookings/${bookingId}/extensions`);
+    return response.data;
+  },
+  getAllExtensions: async (): Promise<BookingExtensionResponse[]> => {
+    const response = await axiosInstance.get("/admin/extensions");
+    return response.data;
+  },
+  approveOrRejectExtension: async (data: ApproveBookingExtensionRequest): Promise<BookingExtensionResponse> => {
+    const response = await axiosInstance.patch("/admin/extensions/approve", data);
     return response.data;
   },
 };

@@ -42,19 +42,6 @@ export const carService = {
     id: string,
     formData: FormData,
   ): Promise<AdminCar> => {
-    const response = await axiosInstance.put(
-      `/admin/cars/${id}/images`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
-    );
-    return response.data;
-  },
-
-  postCarImages: async (id: string, formData: FormData) => {
     const response = await axiosInstance.post(
       `/admin/cars/${id}/images`,
       formData,

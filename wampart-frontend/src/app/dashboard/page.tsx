@@ -97,7 +97,6 @@ export default function CustomerDashboard() {
 
   const PROFILE_ACTIONS = [
     { label: "My Profile", icon: User, color: "bg-navy" },
-    { label: "Documents", icon: FileText, color: "bg-gold" },
   ];
 
   useEffect(() => {
@@ -320,7 +319,8 @@ export default function CustomerDashboard() {
                           ? `${b.carBrand} ${b.carModel}`
                           : b.bookingReference}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {b.carNumberPlate && <span className="mr-2">{b.carNumberPlate}</span>}
                         {b.bookingReference}
                       </p>
                       <p className="text-xs text-muted-foreground">

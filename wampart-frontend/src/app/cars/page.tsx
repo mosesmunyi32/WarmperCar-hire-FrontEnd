@@ -9,11 +9,6 @@ import { Button } from "@/components/ui/button";
 import { carService } from "@/services/carServices";
 import { Car as CarType } from "@/types";
 
-function isInUseNow(ranges: { startDate: string; endDate: string }[]): boolean {
-  const now = new Date()
-  return ranges.some((r) => now >= new Date(r.startDate) && now <= new Date(r.endDate))
-}
-
 export default function CarsPage() {
   const [cars, setCars] = useState<CarType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,26 +19,11 @@ export default function CarsPage() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [passengersFilter, setPassengersFilter] = useState("Any");
-  const [inUseMap, setInUseMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     carService
       .getAllAvailableCars()
-      .then((data) => {
-        setCars(data);
-        Promise.all(
-          data.map((car) =>
-            carService
-              .getBookedDateRanges(car.id)
-              .then((ranges) => ({ id: car.id, inUse: isInUseNow(ranges) }))
-              .catch(() => ({ id: car.id, inUse: false }))
-          )
-        ).then((results) => {
-          const map: Record<string, boolean> = {};
-          results.forEach((r) => { map[r.id] = r.inUse; });
-          setInUseMap(map);
-        });
-      })
+      .then(setCars)
       .catch(() => setError("Failed to load cars. Please refresh."))
       .finally(() => setLoading(false));
   }, []);
@@ -208,8 +188,8 @@ export default function CarsPage() {
                     <Car className="h-20 w-20 text-navy/15 group-hover:text-royal/25 transition-colors" />
                     <span
                       className={`absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full ${
-                        !car.isAvailable || inUseMap[car.id]
-                          ? inUseMap[car.id]
+                        !car.isAvailable || car.isInUse
+                          ? car.isInUse
                             ? "bg-warning text-white"
                             : "bg-muted-foreground text-white"
                           : "bg-success text-white"
@@ -217,7 +197,7 @@ export default function CarsPage() {
                     >
                       {!car.isAvailable
                         ? "Unavailable"
-                        : inUseMap[car.id]
+                        : car.isInUse
                         ? "In Use"
                         : "Available"}
                     </span>
@@ -244,7 +224,7 @@ export default function CarsPage() {
                       </span>
                     </div>
 
-                    {inUseMap[car.id] && (
+                    {car.isInUse && (
                       <Link href={`/cars/${car.id}?openCalendar=true`} className="block mb-3">
                         <div className="flex items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning hover:bg-warning/10 transition-colors">
                           <CalendarSearch className="h-3.5 w-3.5 shrink-0" />
@@ -263,13 +243,13 @@ export default function CarsPage() {
                           /day
                         </span>
                       </div>
-                      <Link href={inUseMap[car.id] ? `/cars/${car.id}?openCalendar=true` : `/cars/${car.id}`}>
+                      <Link href={car.isInUse ? `/cars/${car.id}?openCalendar=true` : `/cars/${car.id}`}>
                         <Button
                           size="sm"
                           disabled={!car.isAvailable}
                           className="bg-navy hover:bg-royal text-white"
                         >
-                          {inUseMap[car.id] ? "See Dates" : "View & Book"}
+                          {car.isInUse ? "See Dates" : "View & Book"}
                         </Button>
                       </Link>
                     </div>

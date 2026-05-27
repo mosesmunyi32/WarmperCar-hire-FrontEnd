@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { Car, Calendar, MapPin, FileText, AlertTriangle, XCircle, Download, Fuel, Settings2, Users, Palette, ClipboardList, RefreshCw, Smartphone, RefreshCcw, ChevronDown, ChevronUp } from "lucide-react"
+import { Car, Calendar, MapPin, FileText, AlertTriangle, XCircle, Download, Fuel, Settings2, Users, Palette, ClipboardList, RefreshCw, Smartphone, RefreshCcw, ChevronDown, ChevronUp, CalendarPlus, Clock, CheckCircle2, Ban } from "lucide-react"
 import Link from "next/link"
 import { CustomerLayout } from "@/components/customer-layout"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/status-badge"
 import { bookingService } from "@/services/bookingServices"
 import { carService } from "@/services/carServices"
 import { inspectionService } from "@/services/inspectionService"
-import { Booking, Car as CarType, CustomerInspectionResponse, InspectionRespondRequest } from "@/types"
+import { Booking, BookingExtensionResponse, Car as CarType, CustomerInspectionResponse, InspectionRespondRequest } from "@/types"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -127,6 +127,11 @@ export default function BookingDetailPage() {
   const [swapLoading, setSwapLoading] = useState(false)
   const [selectedSwapCarId, setSelectedSwapCarId] = useState("")
   const [swapping, setSwapping] = useState(false)
+  const [extensions, setExtensions] = useState<BookingExtensionResponse[]>([])
+  const [showExtensionForm, setShowExtensionForm] = useState(false)
+  const [extDays, setExtDays] = useState("")
+  const [extNote, setExtNote] = useState("")
+  const [submittingExt, setSubmittingExt] = useState(false)
 
   useEffect(() => {
     bookingService
@@ -135,6 +140,7 @@ export default function BookingDetailPage() {
         setBooking(b)
         carService.getCarById(b.carId).then(setCar).catch(() => {})
         inspectionService.getBookingInspectionsForCustomer(b.id).then(setInspections).catch(() => {})
+        bookingService.getMyExtensions().then((all) => setExtensions(all.filter((e) => e.bookingId === b.id))).catch(() => {})
         // Customer booking endpoint may not include receiptUrl — fetch it separately
         if (b.bookingStatus === "CONFIRMED" || b.bookingStatus === "COMPLETED") {
           bookingService.getReceiptUrl(b.id)
@@ -247,6 +253,28 @@ export default function BookingDetailPage() {
       toast.error(msg ?? "Failed to swap car. Please contact support.")
     } finally {
       setSwapping(false)
+    }
+  }
+
+  const handleRequestExtension = async () => {
+    if (!booking || !extDays || Number(extDays) < 1) return
+    setSubmittingExt(true)
+    try {
+      const created = await bookingService.createExtension({
+        bookingId: booking.id,
+        requestedDays: Number(extDays),
+        customerNote: extNote.trim() || undefined,
+      })
+      setExtensions((prev) => [created, ...prev])
+      setShowExtensionForm(false)
+      setExtDays("")
+      setExtNote("")
+      toast.success("Extension request submitted. We'll notify you once it's reviewed.")
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      toast.error(msg ?? "Failed to submit extension request.")
+    } finally {
+      setSubmittingExt(false)
     }
   }
 
@@ -617,6 +645,122 @@ export default function BookingDetailPage() {
                     )}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Booking Extensions */}
+            {(booking.bookingStatus === "CONFIRMED" || extensions.length > 0) && (
+              <div className="bg-white rounded-xl border border-light-gray mb-4 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-light-gray">
+                  <h2 className="font-semibold text-navy text-sm flex items-center gap-2">
+                    <CalendarPlus className="h-4 w-4 text-royal" /> Booking Extensions
+                  </h2>
+                  {booking.bookingStatus === "CONFIRMED" && !extensions.some((e) => e.extensionStatus === "PENDING") && !showExtensionForm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowExtensionForm(true)}
+                      className="flex items-center gap-1.5 text-xs font-medium text-royal border border-royal/30 bg-royal/5 hover:bg-royal/10 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" /> Request Extension
+                    </button>
+                  )}
+                </div>
+
+                <div className="px-5 py-4 space-y-3">
+                  {/* Request form */}
+                  {showExtensionForm && (
+                    <div className="bg-off-white border border-light-gray rounded-xl p-4">
+                      <p className="text-xs font-semibold text-navy mb-3">Request a booking extension</p>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs text-muted-foreground mb-1">Additional days <span className="text-danger">*</span></label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={extDays}
+                            onChange={(e) => setExtDays(e.target.value)}
+                            placeholder="e.g. 2"
+                            className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-muted-foreground mb-1">Note <span className="text-muted-foreground font-normal">(optional)</span></label>
+                          <textarea
+                            value={extNote}
+                            onChange={(e) => setExtNote(e.target.value)}
+                            placeholder="Reason for extension…"
+                            rows={2}
+                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                          />
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={handleRequestExtension}
+                            disabled={submittingExt || !extDays || Number(extDays) < 1}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-royal text-white text-sm font-semibold hover:bg-navy transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <CalendarPlus className="h-4 w-4" />
+                            {submittingExt ? "Submitting…" : "Submit Request"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setShowExtensionForm(false); setExtDays(""); setExtNote(""); }}
+                            disabled={submittingExt}
+                            className="text-sm text-muted-foreground hover:text-navy transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Existing extensions */}
+                  {extensions.length === 0 && !showExtensionForm && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No extension requests yet.</p>
+                  )}
+                  {extensions.map((ext) => (
+                    <div
+                      key={ext.id}
+                      className={cn(
+                        "rounded-xl border px-4 py-3",
+                        ext.extensionStatus === "PENDING" && "border-gold/30 bg-gold/5",
+                        ext.extensionStatus === "APPROVED" && "border-success/30 bg-success/5",
+                        ext.extensionStatus === "REJECTED" && "border-danger/20 bg-danger/5",
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className={cn(
+                              "inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full",
+                              ext.extensionStatus === "PENDING" && "bg-gold/20 text-gold",
+                              ext.extensionStatus === "APPROVED" && "bg-success/15 text-success",
+                              ext.extensionStatus === "REJECTED" && "bg-danger/15 text-danger",
+                            )}>
+                              {ext.extensionStatus === "PENDING" && <Clock className="h-3 w-3" />}
+                              {ext.extensionStatus === "APPROVED" && <CheckCircle2 className="h-3 w-3" />}
+                              {ext.extensionStatus === "REJECTED" && <Ban className="h-3 w-3" />}
+                              {ext.extensionStatus.charAt(0) + ext.extensionStatus.slice(1).toLowerCase()}
+                            </span>
+                            <span className="text-xs text-navy font-semibold">+{ext.requestedDays} day{ext.requestedDays !== 1 ? "s" : ""}</span>
+                            {ext.extensionCost != null && (
+                              <span className="text-xs text-muted-foreground">· KES {ext.extensionCost.toLocaleString()}</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground font-mono">{ext.extensionReference}</p>
+                          {ext.customerNote && (
+                            <p className="text-xs text-muted-foreground mt-1">Your note: {ext.customerNote}</p>
+                          )}
+                          {ext.adminNote && (
+                            <p className="text-xs text-royal mt-1">Admin note: {ext.adminNote}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

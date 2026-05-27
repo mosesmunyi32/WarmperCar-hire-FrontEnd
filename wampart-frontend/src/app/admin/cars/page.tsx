@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Car, AlertTriangle, CheckCircle2, Loader2, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -85,6 +85,7 @@ function TableSkeleton() {
 
 export default function AdminCarsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuthStore();
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
   const [cars, setCars] = useState<AdminCar[]>([]);
@@ -93,7 +94,8 @@ export default function AdminCarsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   type FilterKey = "available" | "unavailable" | "insurance-expiring" | "service-overdue" | "approaching-service";
-  const [activeFilter, setActiveFilter] = useState<FilterKey | null>(null);
+  const initialFilter = (searchParams.get("filter") as FilterKey | null) ?? null;
+  const [activeFilter, setActiveFilter] = useState<FilterKey | null>(initialFilter);
 
   const filteredCars = (() => {
     if (activeFilter === "available") return cars.filter((c) => c.isAvailable);

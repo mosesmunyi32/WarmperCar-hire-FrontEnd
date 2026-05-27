@@ -18,6 +18,9 @@ import {
   ChevronUp,
   ClipboardList,
   Plus,
+  CalendarPlus,
+  Clock,
+  Ban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +28,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { toast } from "sonner";
 import { bookingService } from "@/services/bookingServices";
 import { inspectionService } from "@/services/inspectionService";
-import { AdminBooking, AdminCar, AdminInspectionResponse, UserResponse, CreateInspectionRequest, UpdateInspectionRequest } from "@/types";
+import { AdminBooking, AdminCar, AdminInspectionResponse, ApproveBookingExtensionRequest, BookingExtensionResponse, UserResponse, CreateInspectionRequest, UpdateInspectionRequest } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { carService } from "@/services/carServices";
@@ -256,6 +259,12 @@ export default function AdminBookingDetailPage() {
   const [submittingInspection, setSubmittingInspection] = useState(false);
   const [confirmingOnBehalfId, setConfirmingOnBehalfId] = useState<string | null>(null);
 
+  const [extensions, setExtensions] = useState<BookingExtensionResponse[]>([]);
+  const [extensionsLoading, setExtensionsLoading] = useState(false);
+  const [extAdminNotes, setExtAdminNotes] = useState<Record<string, string>>({});
+  const [approvingExtId, setApprovingExtId] = useState<string | null>(null);
+  const [rejectingExtId, setRejectingExtId] = useState<string | null>(null);
+
   useEffect(() => {
     bookingService
       .getBookingByIdForAdmin(id)
@@ -287,6 +296,13 @@ export default function AdminBookingDetailPage() {
       .then(setInspections)
       .catch(() => {})
       .finally(() => setInspectionsLoading(false));
+
+    setExtensionsLoading(true);
+    bookingService
+      .getExtensionsByBookingId(booking.id)
+      .then(setExtensions)
+      .catch(() => {})
+      .finally(() => setExtensionsLoading(false));
   }, [booking?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const preInspection = inspections.find((i) => i.inspectionType === "PRE_INSPECTION");
@@ -340,6 +356,25 @@ export default function AdminBookingDetailPage() {
       toast.error("Failed to confirm inspection.");
     } finally {
       setConfirmingOnBehalfId(null);
+    }
+  };
+
+  const handleExtensionDecision = async (extensionId: string, approve: boolean) => {
+    const setter = approve ? setApprovingExtId : setRejectingExtId;
+    setter(extensionId);
+    try {
+      const payload: ApproveBookingExtensionRequest = {
+        extensionId,
+        extensionStatus: approve ? "APPROVED" : "REJECTED",
+        adminNote: extAdminNotes[extensionId]?.trim() || undefined,
+      };
+      const updated = await bookingService.approveOrRejectExtension(payload);
+      setExtensions((prev) => prev.map((e) => (e.id === extensionId ? updated : e)));
+      toast.success(approve ? "Extension approved." : "Extension rejected.");
+    } catch {
+      toast.error(`Failed to ${approve ? "approve" : "reject"} extension.`);
+    } finally {
+      setter(null);
     }
   };
 
@@ -667,6 +702,7 @@ export default function AdminBookingDetailPage() {
             {[
               ["Car", carFull],
               ["Customer", customerName],
+              ["Customer Phone", customer?.phoneNumber],
               ["Customer ID Number", customer?.idNumber],
               ["Pick Up", fmt(booking.startDate)],
               ["Return", fmt(booking.endDate)],
@@ -674,6 +710,7 @@ export default function AdminBookingDetailPage() {
               ["Days", `${booking.numberOfDays} days`],
               ["Rate", `KES ${booking.pricePerDay.toLocaleString()} /day`],
               ["Total", `KES ${(booking.bookingCost ?? 0).toLocaleString()}`],
+              ...(booking.approvedByName ? [["Approved By", booking.approvedByName]] : []),
             ].map(([l, v]) => (
               <div key={l} className="flex justify-between gap-4">
                 <span className="text-muted-foreground shrink-0">{l}</span>
@@ -806,6 +843,98 @@ export default function AdminBookingDetailPage() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── EXTENSIONS ── */}
+      {(extensions.length > 0 || extensionsLoading) && (
+        <div className="bg-white rounded-xl border border-light-gray shadow-sm overflow-hidden mb-4">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-light-gray">
+            <h2 className="font-semibold text-navy text-sm flex items-center gap-2">
+              <CalendarPlus className="h-4 w-4 text-royal" /> Booking Extensions
+              {extensions.some((e) => e.extensionStatus === "PENDING") && (
+                <span className="inline-flex items-center justify-center h-4.5 min-w-4.5 px-1 text-[10px] font-bold rounded-full bg-warning text-white">
+                  {extensions.filter((e) => e.extensionStatus === "PENDING").length}
+                </span>
+              )}
+            </h2>
+          </div>
+          <div className="divide-y divide-light-gray">
+            {extensionsLoading ? (
+              <div className="px-5 py-4 space-y-2">
+                {[0, 1].map((i) => <div key={i} className="h-16 bg-light-gray rounded-lg animate-pulse" />)}
+              </div>
+            ) : extensions.map((ext) => (
+              <div key={ext.id} className={cn(
+                "px-5 py-4",
+                ext.extensionStatus === "PENDING" && "bg-gold/5",
+                ext.extensionStatus === "APPROVED" && "bg-success/5",
+                ext.extensionStatus === "REJECTED" && "bg-danger/5",
+              )}>
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className={cn(
+                        "inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full",
+                        ext.extensionStatus === "PENDING" && "bg-gold/20 text-gold",
+                        ext.extensionStatus === "APPROVED" && "bg-success/15 text-success",
+                        ext.extensionStatus === "REJECTED" && "bg-danger/15 text-danger",
+                      )}>
+                        {ext.extensionStatus === "PENDING" && <Clock className="h-3 w-3" />}
+                        {ext.extensionStatus === "APPROVED" && <CheckCircle2 className="h-3 w-3" />}
+                        {ext.extensionStatus === "REJECTED" && <Ban className="h-3 w-3" />}
+                        {ext.extensionStatus.charAt(0) + ext.extensionStatus.slice(1).toLowerCase()}
+                      </span>
+                      <span className="text-sm font-semibold text-navy">+{ext.requestedDays} day{ext.requestedDays !== 1 ? "s" : ""}</span>
+                      {ext.extensionCost != null && (
+                        <span className="text-xs text-muted-foreground">· KES {ext.extensionCost.toLocaleString()}</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-mono">{ext.extensionReference}</p>
+                    {ext.customerNote && (
+                      <p className="text-xs text-muted-foreground mt-1">Customer: {ext.customerNote}</p>
+                    )}
+                    {ext.adminNote && ext.extensionStatus !== "PENDING" && (
+                      <p className="text-xs text-royal mt-0.5">Admin note: {ext.adminNote}</p>
+                    )}
+                  </div>
+                </div>
+
+                {ext.extensionStatus === "PENDING" && (
+                  <div className="mt-2 space-y-2">
+                    <textarea
+                      value={extAdminNotes[ext.id] ?? ""}
+                      onChange={(e) => setExtAdminNotes((prev) => ({ ...prev, [ext.id]: e.target.value }))}
+                      placeholder="Admin note (optional)…"
+                      rows={2}
+                      className="w-full rounded-lg border border-light-gray bg-off-white px-3 py-2 text-xs text-navy placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-royal/30 transition-colors"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleExtensionDecision(ext.id, true)}
+                        disabled={approvingExtId === ext.id || rejectingExtId === ext.id}
+                        className="bg-success hover:bg-success/90 text-white gap-1.5 h-8 text-xs"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        {approvingExtId === ext.id ? "Approving…" : "Approve"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExtensionDecision(ext.id, false)}
+                        disabled={approvingExtId === ext.id || rejectingExtId === ext.id}
+                        className="border-danger/30 text-danger hover:bg-danger/5 gap-1.5 h-8 text-xs"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        {rejectingExtId === ext.id ? "Rejecting…" : "Reject"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

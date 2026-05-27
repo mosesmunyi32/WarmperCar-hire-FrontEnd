@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import type { ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import {
@@ -157,7 +157,17 @@ function AdminSidebarPanel() {
 // ─── Shell export ─────────────────────────────────────────────────────────────
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { isAuthenticated, user } = useAuthStore()
   const breadcrumbs = deriveAdminBreadcrumbs(pathname)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login")
+    } else if (user && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+      router.replace("/dashboard")
+    }
+  }, [isAuthenticated, user, router])
 
   const today = new Date().toLocaleDateString("en-KE", {
     weekday: "long",

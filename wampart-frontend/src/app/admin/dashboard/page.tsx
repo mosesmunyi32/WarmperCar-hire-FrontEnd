@@ -251,7 +251,7 @@ export default function AdminDashboard() {
               icon={CheckCircle}
               color="text-success"
               bg="bg-success/10"
-              href="/admin/bookings"
+              href="/admin/bookings?tab=CONFIRMED"
             />
             <StatCard
               label="Total Customers"
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
               icon={CheckCircle}
               color="text-gold"
               bg="bg-gold/10"
-              href="/admin/bookings"
+              href="/admin/analytics"
             />
             <StatCard
               label="Pending Approval"
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
               icon={Clock}
               color="text-warning"
               bg="bg-warning/10"
-              href="/admin/bookings"
+              href="/admin/bookings?tab=PENDING"
             />
             <StatCard
               label="Unavailable Cars"
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
               icon={XCircle}
               color="text-danger"
               bg="bg-danger/10"
-              href="/admin/cars"
+              href="/admin/cars?filter=unavailable"
             />
             <StatCard
               label="Available Cars"
@@ -306,7 +306,7 @@ export default function AdminDashboard() {
               icon={Car}
               color="text-success"
               bg="bg-success/10"
-              href="/admin/cars"
+              href="/admin/cars?filter=available"
             />
           </>
         )}
@@ -318,9 +318,11 @@ export default function AdminDashboard() {
           <div className="flex flex-wrap gap-3 mb-6">
             {pending > 0 && (
               <Link
-                href="/admin/bookings"
-                className="flex items-center gap-2 bg-warning/10 border border-warning/20 text-warning text-sm rounded-xl px-4 py-2.5 hover:bg-warning/15 transition-colors"
+                href="/admin/bookings?tab=PENDING"
+                className="relative flex items-center gap-2 bg-warning/10 border border-warning/30 text-warning text-sm font-medium rounded-xl px-4 py-2.5 hover:bg-warning/20 transition-colors shadow-sm"
               >
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-warning animate-ping opacity-75" />
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-warning" />
                 <Clock className="h-4 w-4 shrink-0" />
                 {pending} booking{pending !== 1 ? "s" : ""} awaiting approval
                 <ArrowRight className="h-3.5 w-3.5 ml-1" />
@@ -329,22 +331,24 @@ export default function AdminDashboard() {
             {insuranceAlerts > 0 && (
               <Link
                 href="/admin/cars"
-                className="flex items-center gap-2 bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-2.5 hover:bg-danger/15 transition-colors"
+                className="relative flex items-center gap-2 bg-danger/10 border border-danger/30 text-danger text-sm font-medium rounded-xl px-4 py-2.5 hover:bg-danger/20 transition-colors shadow-sm"
               >
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-danger animate-ping opacity-75" />
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-danger" />
                 <AlertTriangle className="h-4 w-4 shrink-0" />
-                {insuranceAlerts} car{insuranceAlerts !== 1 ? "s" : ""} with
-                insurance expiring soon
+                {insuranceAlerts} car{insuranceAlerts !== 1 ? "s" : ""} with insurance expiring soon
                 <ArrowRight className="h-3.5 w-3.5 ml-1" />
               </Link>
             )}
             {pendingVerifications > 0 && (
               <Link
                 href="/admin/customers"
-                className="flex items-center gap-2 bg-azure/10 border border-azure/20 text-azure text-sm rounded-xl px-4 py-2.5 hover:bg-azure/15 transition-colors"
+                className="relative flex items-center gap-2 bg-azure/10 border border-azure/30 text-azure text-sm font-medium rounded-xl px-4 py-2.5 hover:bg-azure/20 transition-colors shadow-sm"
               >
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-azure animate-ping opacity-75" />
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-azure" />
                 <Users className="h-4 w-4 shrink-0" />
-                {pendingVerifications} customer
-                {pendingVerifications !== 1 ? "s" : ""} awaiting ID verification
+                {pendingVerifications} customer{pendingVerifications !== 1 ? "s" : ""} awaiting ID verification
                 <ArrowRight className="h-3.5 w-3.5 ml-1" />
               </Link>
             )}
