@@ -1,9 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import {
-  ChangePasswordRequest,
-  ProfileUpdateRequest,
-  UserResponse,
-} from "@/types";
+import { ProfileUpdateRequest, UserResponse } from "@/types";
 
 export const profileService = {
   getMyProfile: async (id: string): Promise<UserResponse> => {
@@ -36,10 +32,6 @@ export const profileService = {
       formData,
     );
     return response.data;
-  },
-
-  changePassword: async (data: ChangePasswordRequest): Promise<void> => {
-    await axiosInstance.post("/users/password/change", data);
   },
 
   uploadProfilePhoto: async (file: File): Promise<UserResponse> => {

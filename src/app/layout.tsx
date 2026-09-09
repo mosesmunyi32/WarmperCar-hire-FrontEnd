@@ -3,7 +3,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Wampart Car Hire",
+  title: "Wampert Car Hire",
   description: "Professional Car Hiring business in Kenya located in Kiambu",
 };
 

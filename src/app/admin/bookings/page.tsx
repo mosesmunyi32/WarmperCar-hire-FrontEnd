@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Gauge, Search, UserPlus, SlidersHorizontal, X, Car as CarIcon, AlertTriangle, Clock, CheckCircle2 } from "lucide-react"
@@ -195,6 +195,14 @@ function CarsOnTripList({
 }
 
 export default function AdminBookingsPage() {
+  return (
+    <Suspense>
+      <AdminBookingsContent />
+    </Suspense>
+  )
+}
+
+function AdminBookingsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialTab = (searchParams.get("tab") as PageTab | null) ?? "PENDING"

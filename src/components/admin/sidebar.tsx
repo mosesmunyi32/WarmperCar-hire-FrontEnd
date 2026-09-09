@@ -49,7 +49,7 @@ export function AdminSidebar() {
       <div className="flex items-center gap-2 px-6 py-5 border-b border-white/10">
         <Car className="h-7 w-7 text-gold" />
         <div>
-          <p className="text-white font-bold text-base leading-tight">WAMPART</p>
+          <p className="text-white font-bold text-base leading-tight">WAMPERT</p>
           <p className="text-white/40 text-xs">Admin Panel</p>
         </div>
       </div>

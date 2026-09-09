@@ -384,7 +384,7 @@ export default function LandingPage() {
                 Why Us
               </p>
               <h2 className="text-4xl font-black text-white mb-4">
-                Why Choose Wampart?
+                Why Choose Wampert?
               </h2>
               <p className="text-white/45 leading-relaxed mb-8 max-w-md">
                 We are committed to delivering the finest car hire experience in

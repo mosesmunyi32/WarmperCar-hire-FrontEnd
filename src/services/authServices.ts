@@ -3,7 +3,7 @@ import {
   LoginRequest,
   AuthResponse,
   RegisterRequest,
-  passwordChangeReqest,
+  ChangePasswordRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
 } from "@/types";
@@ -19,7 +19,7 @@ export const authService = {
     return response.data;
   },
   requestPasswordChange: async (
-    data: passwordChangeReqest,
+    data: ChangePasswordRequest,
   ): Promise<AuthResponse> => {
     const response = await axiosInstance.post(
       "/auth/security/change-password",

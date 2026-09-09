@@ -51,7 +51,7 @@ export function CustomerSidebar() {
             <Car className="h-4.5 w-4.5" />
           </div>
           <SidebarMenuLabel className="flex flex-col leading-none">
-            <span className="font-bold text-sm text-navy">WAMPART</span>
+            <span className="font-bold text-sm text-navy">WAMPERT</span>
             <span className="text-[10px] text-muted-foreground tracking-widest">CAR HIRE</span>
           </SidebarMenuLabel>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -283,6 +283,14 @@ function AdminInspectionTabs({
 }
 
 export default function AdminBookingDetailPage() {
+  return (
+    <Suspense>
+      <AdminBookingDetailContent />
+    </Suspense>
+  );
+}
+
+function AdminBookingDetailContent() {
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const action = searchParams.get("action");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Car, AlertTriangle, CheckCircle2, Loader2, X, Trash2 } from "lucide-react";
@@ -84,6 +84,14 @@ function TableSkeleton() {
 }
 
 export default function AdminCarsPage() {
+  return (
+    <Suspense>
+      <AdminCarsContent />
+    </Suspense>
+  );
+}
+
+function AdminCarsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuthStore();

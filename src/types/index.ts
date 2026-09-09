@@ -19,7 +19,7 @@ export interface RegisterRequest {
   driversLicenceNumber?: string;
 }
 
-export interface passwordChangeReqest {
+export interface ChangePasswordRequest {
   oldPassword: string;
   newPassword: string;
 }
@@ -98,11 +98,6 @@ export interface AdminUpdateCustomerRequest {
   driversLicenceNumber?: string;
 }
 
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-}
-
 export interface Car {
   id: string;
   brand: string;
@@ -123,7 +118,6 @@ export interface Car {
 }
 
 export interface AdminCar extends Car {
-  isAvaialble: boolean;
   currentMileage: number;
   serviceMileageInterval: number;
   isInsuranceActive: boolean;

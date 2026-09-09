@@ -117,7 +117,7 @@ function AdminSidebarPanel() {
             <Car className="h-4 w-4" />
           </div>
           <SidebarMenuLabel className="flex flex-col leading-none">
-            <span className="font-bold text-sm text-white">WAMPART</span>
+            <span className="font-bold text-sm text-white">WAMPERT</span>
             <span className="text-[10px] text-white/40 tracking-widest">ADMIN PANEL</span>
           </SidebarMenuLabel>
         </div>

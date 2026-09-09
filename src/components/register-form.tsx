@@ -89,11 +89,11 @@ export function RegisterForm() {
         <div className="w-full max-w-lg">
           <div className="lg:hidden flex items-center gap-2 text-navy mb-8">
             <Car className="h-7 w-7 text-gold" />
-            <span className="font-bold text-xl">WAMPART</span>
+            <span className="font-bold text-xl">WAMPERT</span>
           </div>
 
           <h1 className="text-2xl font-bold text-navy mb-1">Create Account</h1>
-          <p className="text-muted-foreground text-sm mb-6">Join Wampart today — it&apos;s free</p>
+          <p className="text-muted-foreground text-sm mb-6">Join Wampert today — it&apos;s free</p>
 
           {/* Step indicator */}
           <div className="flex items-center gap-2 mb-8">
@@ -296,7 +296,7 @@ export function RegisterForm() {
         <div className="flex items-center gap-2 text-white">
           <Car className="h-7 w-7 text-gold" />
           <div>
-            <p className="font-bold text-base leading-none">WAMPART</p>
+            <p className="font-bold text-base leading-none">WAMPERT</p>
             <p className="text-white/40 text-xs tracking-widest">CAR HIRE</p>
           </div>
         </div>
