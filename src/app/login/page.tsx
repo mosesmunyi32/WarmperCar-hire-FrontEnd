@@ -121,10 +121,10 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4 py-10">
-      {/* ── Background — Warmpart car image ── */}
+      {/* ── Background — Wampert car image ── */}
       <div className="absolute inset-0">
         <Image
-          src="/Warmpart car background.jpg"
+          src="/Wampert car background.jpg"
           fill
           alt=""
           className="object-cover object-center scale-105 blur-sm"

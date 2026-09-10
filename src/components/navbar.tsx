@@ -87,7 +87,7 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+                  <Button variant="ghost" size="sm" className="text-navy hover:bg-navy/5">
                     Login
                   </Button>
                 </Link>
@@ -127,7 +127,7 @@ export function Navbar() {
           {!isAuthenticated ? (
             <div className="flex gap-3 pt-2">
               <Link href="/login" className="flex-1" onClick={() => setIsOpen(false)}>
-                <Button variant="outline" className={cn("w-full border-white/20 text-white")}>Login</Button>
+                <Button variant="outline" className={cn("w-full border-navy/20 text-navy")}>Login</Button>
               </Link>
               <Link href="/register" className="flex-1" onClick={() => setIsOpen(false)}>
                 <Button className="w-full bg-gold text-navy font-semibold">Get Started</Button>
