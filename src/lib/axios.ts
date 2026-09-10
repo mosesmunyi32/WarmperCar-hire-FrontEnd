@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
   // baseURL: process.env.NEXT_PUBLIC_API_URL,
-  baseURL: "http://localhost:9020/api/v1",
+  baseURL: "https://api.warmpertcar.site/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
