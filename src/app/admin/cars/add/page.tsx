@@ -82,6 +82,9 @@ export default function AddCarPage() {
         const formData = new FormData();
         selectedImages.forEach((f) => formData.append("files", f));
         await carService.uploadCarImages(newCar.id, formData);
+        toast.success("Car added with images successfully!");
+      } else {
+        toast.success("Car added successfully! You can add images later.");
       }
 
       router.push("/admin/cars");
@@ -249,6 +252,7 @@ export default function AddCarPage() {
                 type="file"
                 accept="image/*"
                 multiple
+                capture="environment"
                 className="hidden"
                 onChange={(e) =>
                   e.target.files && handleImageSelect(e.target.files)
