@@ -252,7 +252,6 @@ export default function AddCarPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                capture="environment"
                 className="hidden"
                 onChange={(e) =>
                   e.target.files && handleImageSelect(e.target.files)
